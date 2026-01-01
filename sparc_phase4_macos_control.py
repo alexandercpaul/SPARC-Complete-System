@@ -11,7 +11,7 @@ Status: PRODUCTION-READY
 import time
 from typing import Optional
 from AppKit import NSWorkspace
-from Accessibility import (
+from ApplicationServices import (
     AXUIElementCreateApplication,
     AXUIElementCopyAttributeValue,
     AXUIElementPerformAction,
