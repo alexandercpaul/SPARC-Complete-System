@@ -23,7 +23,7 @@ import time
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Callable, Awaitable, TypeVar
 from datetime import datetime
 
 # Phase 4 module imports
@@ -43,6 +43,13 @@ from sparc_phase4_cli_integration import (
     ServiceAccountResult
 )
 from sparc_phase4_screenshot_analyzer import ScreenshotAnalyzer
+from sparc_phase4_decision_engine import DecisionEngine, RetryStrategy
+
+# Autonomous mode modules (imported conditionally)
+try:
+    from sparc_phase4_macos_control import MacAutomation
+except ImportError:
+    MacAutomation = None
 
 
 # Configure logging
@@ -53,6 +60,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+T = TypeVar("T")
 
 # ============================================================================
 # ENUMS AND STATE MACHINE
@@ -151,6 +159,8 @@ class OrchestrationContext:
         account_name: Service account name
         vaults: List of vault names
         headless: Whether to run browser headless
+        autonomous: Whether to use autonomous mode (native UI control)
+        max_retries: Maximum number of retries for failed operations
         current_state: Current state machine state
         session_manager: SessionManager instance
         auth_status: Authentication status result
@@ -162,6 +172,8 @@ class OrchestrationContext:
     account_name: str
     vaults: List[str]
     headless: bool = False
+    autonomous: bool = False
+    max_retries: int = 3
     current_state: OrchestrationState = OrchestrationState.INIT
     session_manager: Optional[SessionManager] = None
     auth_status: Optional[AuthStatus] = None
@@ -194,7 +206,24 @@ class Orchestrator:
         self.config = config or {}
         self.context: Optional[OrchestrationContext] = None
         self.playwright_driver: Optional[AsyncPlaywrightDriver] = None
-        logger.info("Orchestrator initialized")
+
+        # Initialize autonomous modules if enabled
+        self.autonomous = self.config.get('autonomous', False)
+        self.max_retries = self.config.get('max_retries', 3)
+
+        if self.autonomous:
+            self.decision_engine = DecisionEngine()
+            if MacAutomation is not None:
+                self.macos_control = MacAutomation()
+                logger.info("Autonomous mode enabled with MacAutomation")
+            else:
+                self.macos_control = None
+                logger.warning("Autonomous mode enabled but MacAutomation not available")
+        else:
+            self.decision_engine = None
+            self.macos_control = None
+
+        logger.info(f"Orchestrator initialized (autonomous={self.autonomous})")
 
     async def orchestrate(
         self,
@@ -240,7 +269,9 @@ class Orchestrator:
         self.context = OrchestrationContext(
             account_name=account_name,
             vaults=vaults,
-            headless=headless
+            headless=headless,
+            autonomous=self.autonomous,
+            max_retries=self.max_retries
         )
 
         start_time = time.time()
@@ -252,7 +283,10 @@ class Orchestrator:
         try:
             # State 1: Check authentication
             await self._transition_state(OrchestrationState.CHECK_AUTH)
-            await self._check_auth_status()
+            await self._retry_with_backoff(
+                self._check_auth_status,
+                step_name="check_auth_status"
+            )
 
             # State 2: Initialize session manager
             await self._transition_state(OrchestrationState.SESSION_INIT)
@@ -264,19 +298,31 @@ class Orchestrator:
 
             # State 4: Navigate to service account page
             await self._transition_state(OrchestrationState.NAVIGATE)
-            await self._navigate_to_page()
+            await self._retry_with_backoff(
+                self._navigate_to_page,
+                step_name="navigate_to_page"
+            )
 
             # State 5: Fill form
             await self._transition_state(OrchestrationState.FILL_FORM)
-            await self._fill_account_form()
+            await self._retry_with_backoff(
+                self._fill_account_form,
+                step_name="fill_account_form"
+            )
 
             # State 6: Navigate wizard
             await self._transition_state(OrchestrationState.WIZARD_NAV)
-            await self._navigate_wizard()
+            await self._retry_with_backoff(
+                self._navigate_wizard,
+                step_name="navigate_wizard"
+            )
 
             # State 7: Extract token
             await self._transition_state(OrchestrationState.EXTRACT_TOKEN)
-            await self._extract_service_token()
+            await self._retry_with_backoff(
+                self._extract_service_token,
+                step_name="extract_service_token"
+            )
 
             # State 8: Validate token
             await self._transition_state(OrchestrationState.VALIDATE_TOKEN)
@@ -361,6 +407,81 @@ class Orchestrator:
             f"State transition: {old_state.value} → {new_state.value}"
         )
 
+    async def _retry_with_backoff(
+        self,
+        operation: Callable[[], Awaitable[T]],
+        step_name: Optional[str] = None
+    ) -> T:
+        """
+        Retry an async operation with exponential backoff.
+
+        Uses DecisionEngine.get_retry_strategy() and respects config max_retries.
+        """
+        name = step_name or getattr(operation, "__name__", "operation")
+        attempt = 0
+
+        while True:
+            try:
+                return await operation()
+            except Exception as exc:
+                strategy = await DecisionEngine.get_retry_strategy(exc)
+                max_attempts = self._resolve_max_attempts(strategy)
+
+                if not strategy.retryable:
+                    logger.error(
+                        f"{name} failed with non-retryable error: {exc} "
+                        f"(strategy={strategy.name}, reason={strategy.reason})"
+                    )
+                    raise
+                if max_attempts <= 0:
+                    logger.error(
+                        f"{name} failed with retries disabled: {exc} "
+                        f"(strategy={strategy.name}, reason={strategy.reason})"
+                    )
+                    raise
+
+                attempt += 1
+                if attempt >= max_attempts:
+                    logger.error(
+                        f"{name} failed after {attempt}/{max_attempts} attempts: {exc} "
+                        f"(strategy={strategy.name}, reason={strategy.reason})"
+                    )
+                    raise
+
+                delay = strategy.next_delay_sec(attempt)
+                logger.warning(
+                    f"{name} failed (attempt {attempt}/{max_attempts}); "
+                    f"retrying in {delay:.2f}s - "
+                    f"strategy={strategy.name}, reason={strategy.reason}, error={exc}"
+                )
+                await asyncio.sleep(delay)
+
+    def _resolve_max_attempts(self, strategy: RetryStrategy) -> int:
+        """Resolve the effective retry cap using config max_retries."""
+        configured = self.config.get("max_retries")
+        if configured is None:
+            return max(0, int(strategy.max_attempts))
+
+        try:
+            configured_int = int(configured)
+        except (TypeError, ValueError):
+            logger.warning(
+                f"Invalid max_retries config ({configured}); "
+                f"using strategy default of {strategy.max_attempts}"
+            )
+            return max(0, int(strategy.max_attempts))
+
+        if configured_int < 0:
+            logger.warning(
+                f"Negative max_retries config ({configured_int}); treating as 0"
+            )
+            return 0
+
+        if strategy.max_attempts <= 0:
+            return 0
+
+        return min(int(strategy.max_attempts), configured_int)
+
     # ========================================================================
     # ORCHESTRATION STEPS
     # ========================================================================
@@ -428,7 +549,10 @@ class Orchestrator:
         }
 
         try:
-            self.playwright_driver = AsyncPlaywrightDriver(config)
+            self.playwright_driver = AsyncPlaywrightDriver(
+                config,
+                macos_control=self.macos_control if self.autonomous else None
+            )
             driver = await self.playwright_driver.__aenter__()
 
             self.context.page = driver.page
@@ -477,7 +601,9 @@ class Orchestrator:
         form_result = await fill_service_account_form(
             self.context.page,
             self.context.account_name,
-            self.context.vaults
+            self.context.vaults,
+            macos_control=self.macos_control if self.autonomous else None,
+            autonomous=self.autonomous
         )
 
         if not form_result.get("success", False):
@@ -501,7 +627,9 @@ class Orchestrator:
 
         wizard_result = await navigate_wizard_steps(
             self.context.page,
-            max_steps=5
+            max_steps=5,
+            macos_control=self.macos_control if self.autonomous else None,
+            autonomous=self.autonomous
         )
 
         if not wizard_result.get("success", False):

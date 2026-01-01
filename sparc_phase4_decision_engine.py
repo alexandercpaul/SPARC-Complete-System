@@ -218,6 +218,11 @@ class DecisionEngine:
     def __init__(self, logger_: Optional[logging.Logger] = None) -> None:
         self._logger = logger_ or logger
 
+    @staticmethod
+    async def get_retry_strategy(error: Exception) -> RetryStrategy:
+        """Expose retry strategy selection for external callers."""
+        return await get_retry_strategy(error)
+
     async def decide(self, context: DecisionContext) -> Action:
         """Analyze page state and decide the next action."""
         analysis = await self._analyze(context)

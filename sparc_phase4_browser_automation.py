@@ -18,6 +18,13 @@ import time
 from pathlib import Path
 from typing import Literal, Optional, TypeVar, Callable
 
+# Internal imports
+try:
+    from sparc_phase4_macos_control import MacAutomation
+except ImportError:
+    MacAutomation = None
+    print("WARNING: MacAutomation not available. Ensure sparc_phase4_macos_control.py is present.")
+
 # Third-party imports
 try:
     from playwright.async_api import (
@@ -195,18 +202,34 @@ class YabaiWindowManager:
 class AsyncPlaywrightDriver:
     """Async Playwright driver with context management."""
 
-    def __init__(self, config: dict):
+    def __init__(self, config: dict, macos_control: Optional["MacAutomation"] = None):
         """
         Initialize Playwright driver.
 
         Args:
             config: Configuration dictionary
+            macos_control: Optional MacAutomation instance for native control
         """
         self.config = config
+        self.macos_control = macos_control
         self.playwright: Optional[Playwright] = None
         self.browser: Optional[Browser] = None
         self.context: Optional[BrowserContext] = None
         self.page: Optional[Page] = None
+
+    def focus_browser_window(self):
+        """Focus the browser window using native macOS control."""
+        if self.macos_control:
+            try:
+                # Assuming Chrome based on default config
+                app_name = "Google Chrome"
+                if self.config.get("browser", {}).get("channel") == "msedge":
+                    app_name = "Microsoft Edge"
+                
+                self.macos_control.focus_window(app_name)
+                print(f"✓ Native focus set to {app_name}")
+            except Exception as e:
+                print(f"WARNING: Native focus failed: {e}")
 
     async def __aenter__(self):
         """Async context manager entry - initialize browser."""
@@ -345,7 +368,9 @@ async def navigate_to_service_account_page(
 async def fill_service_account_form(
     page: Page,
     name: str,
-    vaults: Optional[list[str]] = None
+    vaults: Optional[list[str]] = None,
+    macos_control: Optional["MacAutomation"] = None,
+    autonomous: bool = False
 ) -> dict:
     """
     Fill service account creation form (name and vault selection).
@@ -354,12 +379,14 @@ async def fill_service_account_form(
         page: Playwright page object
         name: Service account name
         vaults: List of vault names (optional)
+        macos_control: Optional MacAutomation instance
+        autonomous: Whether to use autonomous mode (native control)
 
     Returns:
         Dictionary with success status and message
     """
     # Fill name field
-    name_result = await _fill_name_field(page, name)
+    name_result = await _fill_name_field(page, name, macos_control, autonomous)
     if not name_result["success"]:
         return name_result
 
@@ -372,17 +399,41 @@ async def fill_service_account_form(
     return {"success": True, "message": "Form filled successfully"}
 
 
-async def _fill_name_field(page: Page, account_name: str) -> dict:
+async def _fill_name_field(
+    page: Page,
+    account_name: str,
+    macos_control: Optional["MacAutomation"] = None,
+    autonomous: bool = False
+) -> dict:
     """
     Fill service account name field with verification.
 
     Args:
         page: Playwright page object
         account_name: Name to enter
+        macos_control: Optional MacAutomation instance
+        autonomous: Whether to use autonomous mode
 
     Returns:
         Dictionary with success status
     """
+    # Native Control Path
+    if autonomous and macos_control:
+        try:
+            # Handle permission dialogs first
+            macos_control.handle_permission_dialog()
+            
+            # Use native paste for reliability
+            if macos_control.paste_text("Google Chrome", "Service account name", account_name):
+                print(f"✓ Native paste successful: {account_name}")
+                # Verify with Playwright
+                await asyncio.sleep(0.5)
+                # Still check value via Playwright to be sure
+            else:
+                print("⚠ Native paste failed, falling back to Playwright")
+        except Exception as e:
+            print(f"⚠ Native control error: {e}")
+
     # Multiple selector strategies (defensive programming)
     name_selectors = [
         "input[name='name']",
@@ -513,16 +564,37 @@ async def _select_vault_permissions(page: Page, vault_name: str) -> dict:
 # WIZARD NAVIGATION
 # ============================================================================
 
-async def click_next(page: Page) -> dict:
+async def click_next(
+    page: Page,
+    macos_control: Optional["MacAutomation"] = None,
+    autonomous: bool = False
+) -> dict:
     """
     Click the next button in wizard.
 
     Args:
         page: Playwright page object
+        macos_control: Optional MacAutomation instance
+        autonomous: Whether to use autonomous mode
 
     Returns:
         Dictionary with success status
     """
+    # Native Control Path
+    if autonomous and macos_control:
+        try:
+            # Handle permission dialogs
+            macos_control.handle_permission_dialog()
+            
+            # Try common button labels
+            for label in ["Next", "Continue", "Create"]:
+                if macos_control.click_button("Google Chrome", label):
+                    print(f"✓ Native click successful: {label}")
+                    await page.wait_for_load_state("networkidle", timeout=10000)
+                    return {"success": True, "message": f"Native click: {label}"}
+        except Exception as e:
+            print(f"⚠ Native click failed: {e}")
+
     next_button_selectors = [
         "button:has-text('Next')",
         "button:has-text('Continue')",
@@ -563,13 +635,20 @@ async def click_next(page: Page) -> dict:
     return {"success": True, "message": "Next button clicked"}
 
 
-async def navigate_wizard_steps(page: Page, max_steps: int = 5) -> dict:
+async def navigate_wizard_steps(
+    page: Page,
+    max_steps: int = 5,
+    macos_control: Optional["MacAutomation"] = None,
+    autonomous: bool = False
+) -> dict:
     """
     Navigate through wizard steps until token display.
 
     Args:
         page: Playwright page object
         max_steps: Maximum number of steps to attempt
+        macos_control: Optional MacAutomation instance
+        autonomous: Whether to use autonomous mode
 
     Returns:
         Dictionary with success status and steps taken
@@ -591,7 +670,7 @@ async def navigate_wizard_steps(page: Page, max_steps: int = 5) -> dict:
             }
 
         # Click next button
-        result = await click_next(page)
+        result = await click_next(page, macos_control, autonomous)
 
         if not result["success"]:
             # No next button - check if wizard is complete
@@ -1011,7 +1090,9 @@ async def retry_with_exponential_backoff(
 async def create_service_account_automated(
     account_name: str = "SPARC-Automation",
     vault_name: str = "Automation",
-    config: Optional[dict] = None
+    config: Optional[dict] = None,
+    autonomous: bool = False,
+    macos_control: Optional["MacAutomation"] = None
 ) -> dict:
     """
     Main orchestration function for service account creation.
@@ -1020,6 +1101,8 @@ async def create_service_account_automated(
         account_name: Name for the service account
         vault_name: Vault name for permissions
         config: Optional configuration dictionary
+        autonomous: Whether to use autonomous mode (native control)
+        macos_control: Optional MacAutomation instance
 
     Returns:
         Dictionary with:
@@ -1032,15 +1115,24 @@ async def create_service_account_automated(
     if config is None:
         config = DEFAULT_CONFIG.copy()
 
+    # Initialize MacAutomation if needed
+    if autonomous and macos_control is None and MacAutomation:
+        try:
+            macos_control = MacAutomation()
+            print("✓ MacAutomation initialized for autonomous mode")
+        except Exception as e:
+            print(f"WARNING: Failed to initialize MacAutomation: {e}")
+
     print("=" * 60)
     print("1PASSWORD SERVICE ACCOUNT AUTOMATION")
     print("=" * 60)
     print(f"Account name: {account_name}")
     print(f"Vault name: {vault_name}")
+    print(f"Mode: {'Autonomous (Native)' if autonomous else 'Standard (Playwright)'}")
     print("=" * 60)
 
     # Initialize Playwright driver
-    async with AsyncPlaywrightDriver(config) as driver:
+    async with AsyncPlaywrightDriver(config, macos_control) as driver:
         page = driver.page
 
         try:
@@ -1050,6 +1142,11 @@ async def create_service_account_automated(
 
             if nav_result["status"] == "auth_required":
                 print("\n⚠ Authentication required!")
+                
+                if autonomous:
+                    # Try to focus window for user
+                    driver.focus_browser_window()
+                
                 print("Please authenticate in the browser window.")
                 print("Waiting up to 120 seconds...")
 
@@ -1072,7 +1169,9 @@ async def create_service_account_automated(
             form_result = await fill_service_account_form(
                 page,
                 account_name,
-                [vault_name]
+                [vault_name],
+                macos_control,
+                autonomous
             )
 
             if not form_result["success"]:
@@ -1084,7 +1183,12 @@ async def create_service_account_automated(
 
             # Phase 3: Wizard navigation
             print("\n[Phase 3] Navigating wizard steps...")
-            wizard_result = await navigate_wizard_steps(page, max_steps=5)
+            wizard_result = await navigate_wizard_steps(
+                page, 
+                max_steps=5, 
+                macos_control=macos_control, 
+                autonomous=autonomous
+            )
 
             if not wizard_result["success"]:
                 return {
@@ -1125,9 +1229,12 @@ async def create_service_account_automated(
             # Screenshot for debugging
             screenshot_dir = Path("/tmp/1password_automation")
             screenshot_dir.mkdir(parents=True, exist_ok=True)
-            await page.screenshot(
-                path=str(screenshot_dir / "error_final_exception.png")
-            )
+            try:
+                await page.screenshot(
+                    path=str(screenshot_dir / "error_final_exception.png")
+                )
+            except:
+                pass
 
             return {
                 "success": False,
