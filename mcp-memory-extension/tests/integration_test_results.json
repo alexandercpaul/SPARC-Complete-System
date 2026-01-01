@@ -1,0 +1,101 @@
+{
+  "timestamp": "2025-12-31T12:57:36.996736",
+  "tests_passed": 6,
+  "tests_failed": 0,
+  "tests": [
+    {
+      "name": "Server Health",
+      "status": "PASS",
+      "message": "MCP Memory server is healthy and responding",
+      "timestamp": "2025-12-31T12:57:37.001354",
+      "data": {
+        "status": "healthy",
+        "service": "mcp-memory-extension",
+        "version": "1.0.0",
+        "timestamp": "2025-12-31T17:57:37.000954"
+      }
+    },
+    {
+      "name": "Vector Store File",
+      "status": "PASS",
+      "message": "Vector store exists: 66.07 KB",
+      "timestamp": "2025-12-31T12:57:37.001432",
+      "data": {
+        "path": "/Users/alexandercpaul/.mcp-memory/vector_store.pkl",
+        "size_bytes": 67653
+      }
+    },
+    {
+      "name": "Store Integration Memory",
+      "status": "PASS",
+      "message": "Stored 0 chunks",
+      "timestamp": "2025-12-31T12:57:37.384801",
+      "data": {
+        "status": "success",
+        "chunks_stored": 3,
+        "chunk_ids": [
+          "cd1c5b2a6b1c0518fd6acdc3c80cb0ed",
+          "d87bdff6265d26148c7e07774ffbcc01",
+          "333fc869bba9415c5f7149e546a7a8bb"
+        ],
+        "timestamp": "2025-12-31T17:57:37.383842"
+      }
+    },
+    {
+      "name": "Retrieve Integration Memory",
+      "status": "PASS",
+      "message": "Retrieved 3 chunks, found integration test memory",
+      "timestamp": "2025-12-31T12:57:39.426604",
+      "data": {
+        "chunks": 3,
+        "query_time_ms": 35.0
+      }
+    },
+    {
+      "name": "Storage Metrics",
+      "status": "PASS",
+      "message": "Using 71.99 KB of 2048 GB iCloud storage (0.00000335%)",
+      "timestamp": "2025-12-31T12:57:39.428093",
+      "data": {
+        "current_usage": {
+          "bytes": 73720,
+          "kb": 71.99,
+          "mb": 0.07
+        },
+        "icloud_capacity": {
+          "total_gb": 2048,
+          "percent_used": "0.00000335%"
+        },
+        "capacity_estimate": {
+          "chunks_stored": 0,
+          "chunks_remaining": 4398046511,
+          "total_possible_chunks": 4398046511
+        },
+        "stats": {
+          "status": "success",
+          "stats": {
+            "total_chunks": 36,
+            "embedding_model": "all-MiniLM-L6-v2",
+            "embedding_dim": 384,
+            "storage_type": "in-memory (numpy)",
+            "chunk_size": 512,
+            "chunk_overlap": 50
+          },
+          "timestamp": "2025-12-31T17:57:39.427715"
+        }
+      }
+    },
+    {
+      "name": "Cloud Sync Detection",
+      "status": "PASS",
+      "message": "MCP Memory is local. Consider symlinking to iCloud for cloud backup",
+      "timestamp": "2025-12-31T12:57:39.428188",
+      "data": {
+        "mcp_memory_location": "/Users/alexandercpaul/.mcp-memory",
+        "icloud_base": "/Users/alexandercpaul/Library/Mobile Documents/com~apple~CloudDocs",
+        "synced_via_icloud": false,
+        "sync_method": "Local with backup recommended"
+      }
+    }
+  ]
+}

@@ -1,0 +1,202 @@
+{
+  "task": {
+    "id": "task_e_6954ee1a69708321aa29fff56844f07b",
+    "created_at": 1767173658.411999,
+    "title": "New task",
+    "has_generated_title": false,
+    "current_turn_id": "task_e_6954ee1a69708321aa29fff56844f07b~assttrn_e_6954ee1afd288321b5cb4b633dc81bd3",
+    "has_unread_turn": false,
+    "denormalized_metadata": {
+      "num_follow_ups": 0,
+      "repo_name_map": {},
+      "last_user_turn_created_at": null,
+      "last_turn_status": null,
+      "diff_stats": {
+        "files_modified": null,
+        "lines_added": null,
+        "lines_removed": null
+      },
+      "last_pushed_turn_id": null,
+      "start_branch_name": null,
+      "pushed_branch_name": null,
+      "cached_pull_request_data": null
+    },
+    "archived": false,
+    "task_status_display": {
+      "latest_turn_status_display": {
+        "turn_id": "task_e_6954ee1a69708321aa29fff56844f07b~assttrn_e_6954ee1afd288321b5cb4b633dc81bd3",
+        "turn_status": "pending",
+        "diff_stats": null,
+        "sibling_turn_ids": [],
+        "image_asset_pointer_citations": null,
+        "issue_counts": null,
+        "intent": "pr",
+        "cancellation_requested_at": null
+      },
+      "environment_label": "alexandercpaul/test",
+      "branch_name": "main",
+      "fix_task_id": null,
+      "initial_intent": "pr"
+    },
+    "creator_workspace": null,
+    "external_pull_requests": []
+  },
+  "user_turn": {
+    "type": "user",
+    "id": "task_e_6954ee1a69708321aa29fff56844f07b~usertrn_e_6954ee1a8828832190c63c7abf1493ba",
+    "role": "user",
+    "input_items": [
+      {
+        "type": "message",
+        "role": "user",
+        "content": [
+          {
+            "content_type": "text",
+            "text": "Say hello in 3 words"
+          }
+        ]
+      }
+    ],
+    "external_post_config": null,
+    "user_model_slug": "slug",
+    "previous_turn_id": null,
+    "created_at": 1767173658.551615
+  },
+  "turn": {
+    "type": "assistant",
+    "id": "task_e_6954ee1a69708321aa29fff56844f07b~assttrn_e_6954ee1afd288321b5cb4b633dc81bd3",
+    "sibling_turn_ids": null,
+    "attempt_placement": null,
+    "role": "assistant",
+    "output_items": [],
+    "child_turns": [],
+    "conversation_id": "None",
+    "error": null,
+    "latest_event": null,
+    "worklog": {
+      "messages": []
+    },
+    "app_server_events": {
+      "events": []
+    },
+    "turn_status": "pending",
+    "cancellation_requested_at": null,
+    "pull_request_status": "not_created",
+    "pull_request_data": null,
+    "created_at": 1767173658.989002,
+    "internal_only_rollouts": null,
+    "environment_id": "6947a7192564819180f5e1591ac503fe",
+    "environment": {
+      "id": "6947a7192564819180f5e1591ac503fe",
+      "machine_id": "wham-public/wham-universal",
+      "label": "alexandercpaul/test",
+      "is_pinned": false,
+      "description": "",
+      "workspace_dir": "/workspace",
+      "agent_network_access": {
+        "mode": "on",
+        "preset_allowlist": "all",
+        "allowlist_domains": "",
+        "safe_methods_only": null
+      },
+      "repos": [
+        "github-1120317593"
+      ],
+      "setup": "",
+      "maintenance_setup": "",
+      "repo_map": {
+        "github-1120317593": {
+          "id": "1120317593",
+          "name": "test",
+          "owner": {
+            "login": "alexandercpaul",
+            "id": 65577280,
+            "type": "User",
+            "avatar_url": "https://avatars.githubusercontent.com/u/65577280?v=4",
+            "url": "https://api.github.com/users/alexandercpaul"
+          },
+          "repository_full_name": "alexandercpaul/test",
+          "clone_url": "https://github.com/alexandercpaul/test.git",
+          "default_branch": "main",
+          "git_commits_url": "https://api.github.com/repos/alexandercpaul/test/git/commits{/sha}",
+          "git_refs_url": "https://api.github.com/repos/alexandercpaul/test/git/refs{/sha}",
+          "git_url": "git://github.com/alexandercpaul/test.git",
+          "visibility": "private",
+          "allow_auto_merge": false,
+          "allow_merge_commit": true,
+          "allow_rebase_merge": true,
+          "allow_squash_merge": true,
+          "allow_update_branch": false,
+          "language": null,
+          "size": 0,
+          "master_branch": null,
+          "permissions": {
+            "admin": true,
+            "push": true,
+            "pull": true
+          }
+        }
+      },
+      "env_vars": {
+        "CODEX_ENV_PYTHON_VERSION": "3.12",
+        "CODEX_ENV_NODE_VERSION": "20",
+        "CODEX_ENV_RUBY_VERSION": "3.4.4",
+        "CODEX_ENV_RUST_VERSION": "1.89.0",
+        "CODEX_ENV_GO_VERSION": "1.24.3",
+        "CODEX_ENV_BUN_VERSION": "1.2.14",
+        "CODEX_ENV_PHP_VERSION": "8.4",
+        "CODEX_ENV_JAVA_VERSION": "21",
+        "CODEX_ENV_SWIFT_VERSION": "6.1"
+      },
+      "secrets": {},
+      "secrets_with_domains": null,
+      "task_count": 4,
+      "creator_id": "user-PnHQjRuJkGJcMQq8AZVHNPQS",
+      "share_settings": "workspace",
+      "share_targets": [],
+      "permissions": null,
+      "created_at": 1766303513.146499,
+      "auto_setup_settings": {
+        "use_auto_setup": true
+      },
+      "cache_settings": {
+        "post_setup_cache_enabled": true,
+        "cache_invalidation_key": ""
+      },
+      "etag": "\"b800d7b9-0000-0200-0000-6947a9560000\"",
+      "enable_authtranslator": false
+    },
+    "branch": "main",
+    "base_commit_sha": null,
+    "previous_turn_id": "task_e_6954ee1a69708321aa29fff56844f07b~usertrn_e_6954ee1a8828832190c63c7abf1493ba",
+    "logs": null,
+    "proxy_events": null,
+    "debug_metadata": null,
+    "discarded": false,
+    "model_version": null,
+    "languages": null
+  },
+  "rate_limit": {
+    "allowed": true,
+    "limit_reached": false,
+    "limit": 90000.0,
+    "remaining": 75686.6,
+    "resets_after": 79666.0,
+    "user_plan_type": "pro",
+    "windows": [
+      {
+        "limit": 27000.0,
+        "limit_window_mins": 300,
+        "remaining": 26921.8,
+        "resets_after_secs": 16862.958
+      },
+      {
+        "limit": 90000.0,
+        "limit_window_mins": 10080,
+        "remaining": 75686.6,
+        "resets_after_secs": 79666.925
+      }
+    ],
+    "resets_after_text": "in 23 hours"
+  }
+}

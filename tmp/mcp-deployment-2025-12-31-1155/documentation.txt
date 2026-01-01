@@ -1,0 +1,441 @@
+Of course. Here is a comprehensive documentation for the CC-MemEx MCP system, structured as requested.
+
+***
+
+# Documentation: Cognitive Core - Memory Expansion (CC-MemEx) MCP
+
+Welcome to the official documentation for the CC-MemEx Memory & Context Processor (MCP). This system is designed to provide long-term, semantic memory and optimized context for large language model (LLM) applications. It ingests, stores, and retrieves information, ensuring that your AI agents have access to relevant, up-to-date, and concise context.
+
+**Version:** 0.1.0 (Alpha)
+**Last Updated:** [Current Date]
+
+---
+
+### Table of Contents
+
+1.  **[User Guide](#user-guide)**
+    *   [Prerequisites](#prerequisites)
+    *   [Installation](#installation)
+    *   [First-Time Configuration](#first-time-configuration)
+    *   [Running the Server](#running-the-server)
+    *   [Example Workflow](#example-workflow)
+2.  **[Architecture Overview](#architecture-overview)**
+    *   [High-Level Diagram](#high-level-diagram)
+    *   [Core Components](#core-components)
+3.  **[API Reference](#api-reference)**
+    *   [`POST /memory/add`](#post-memoryadd)
+    *   [`POST /context/generate`](#post-contextgenerate)
+    *   [`GET /health`](#get-health)
+4.  **[Configuration (`config.yaml`)](#configuration-configyaml)**
+    *   [`server`](#server-configuration)
+    *   [`embeddings`](#embeddings-configuration)
+    *   [`vector_storage`](#vector_storage-configuration)
+    *   [`chunking`](#chunking-configuration)
+    *   [`redaction`](#redaction-configuration)
+    *   [`context_optimizer`](#context_optimizer-configuration)
+5.  **[Troubleshooting](#troubleshooting)**
+    *   [Installation Issues](#installation-issues)
+    *   [Server Startup Failures](#server-startup-failures)
+    *   [API Errors](#api-errors)
+6.  **[Performance Tuning](#performance-tuning)**
+    *   [Optimizing Chunking](#optimizing-chunking)
+    *   [Choosing an Embedding Model](#choosing-an-embedding-model)
+    *   [Vector Storage Selection](#vector-storage-selection)
+    *   [Context Optimization Strategy](#context-optimization-strategy)
+
+---
+
+## 1. User Guide
+
+This guide will walk you through setting up and using the CC-MemEx server for the first time.
+
+### Prerequisites
+
+Before you begin, ensure you have the following installed:
+*   Python 3.9+
+*   `pip` and `venv`
+*   `git` (for cloning the repository)
+*   An API key from an embeddings provider (e.g., OpenAI).
+
+### Installation
+
+The provided `install.sh` script automates the setup process by creating a Python virtual environment and installing all necessary dependencies.
+
+```bash
+# 1. Clone the repository
+git clone <your-repository-url>
+cd cc-memex-mcp
+
+# 2. Make the installation script executable
+chmod +x install.sh
+
+# 3. Run the script
+./install.sh
+```
+The script will create a `venv` directory. All subsequent commands should be run after activating this environment.
+
+### First-Time Configuration
+
+The server is configured using the `config.yaml` file. A default template is provided as `config.yaml.example`.
+
+1.  **Activate the virtual environment:**
+    ```bash
+    source venv/bin/activate
+    ```
+
+2.  **Create your configuration file:**
+    ```bash
+    cp config.yaml.example config.yaml
+    ```
+
+3.  **Edit `config.yaml`:**
+    Open `config.yaml` in your favorite text editor. The most critical step is to add your embeddings provider API key.
+
+    ```yaml
+    # config.yaml
+    embeddings:
+      provider: openai
+      model: text-embedding-ada-002
+      # ⚠️ Replace "YOUR_API_KEY" with your actual OpenAI API key
+      api_key: "YOUR_API_KEY"
+    ```
+
+### Running the Server
+
+With the environment activated and configuration in place, you can start the server.
+
+```bash
+python server.py
+```
+
+If successful, you will see output indicating the server is running, typically on `http://127.0.0.1:8000`.
+
+```
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+```
+
+### Example Workflow
+
+Let's walk through a simple use case: adding a piece of information to memory and then asking a question about it.
+
+#### Step 1: Add Information to Memory
+
+Use a tool like `curl` to send a `POST` request to the `/memory/add` endpoint. We'll add a fact about the system's launch date.
+
+```bash
+curl -X POST http://127.0.0.1:8000/memory/add \
+-H "Content-Type: application/json" \
+-d '{
+  "text": "The CC-MemEx MCP system was first launched in Q4 2023. It includes a memory manager and a context optimizer.",
+  "metadata": {
+    "source": "internal_memo.txt",
+    "document_id": "doc-101"
+  }
+}'
+```
+**Expected Response:**
+```json
+{
+  "status": "success",
+  "message": "Memory added successfully.",
+  "chunk_ids": ["f8a2...c1b4", "e3d5...a9f0"]
+}
+```
+
+#### Step 2: Generate Context for a Query
+
+Now, ask a question. The server will find the relevant information and return it as optimized context, ready to be passed to an LLM.
+
+```bash
+curl -X POST http://127.0.0.1:8000/context/generate \
+-H "Content-Type: application/json" \
+-d '{
+  "query": "When was the MCP system launched?"
+}'
+```
+**Expected Response:**
+```json
+{
+  "query": "When was the MCP system launched?",
+  "context": "The CC-MemEx MCP system was first launched in Q4 2023. It includes a memory manager and a context optimizer.",
+  "metadata": [
+    {
+      "source": "internal_memo.txt",
+      "document_id": "doc-101"
+    }
+  ]
+}
+```
+
+You can now take this `context` string and prepend it to your prompt for an LLM.
+
+---
+
+## 2. Architecture Overview
+
+The CC-MemEx MCP is built on a modular architecture that processes, stores, and retrieves textual data efficiently.
+
+### High-Level Diagram
+
+```
++----------------+      +----------------------+      +--------------------+
+|   Ingestion    |----->|                      |<---->|   Vector Storage   |
+| (POST /add)    |      |                      |      | (e.g., ChromaDB)   |
++----------------+      |    Memory Manager    |      +--------------------+
+                        |                      |
++----------------+      | (Core Orchestrator)  |      +--------------------+
+|     Query      |----->|                      |<---->| Context Optimizer  |
+| (POST /context)|      |                      |      |  (Token Limiter)   |
++----------------+      +----------------------+      +--------------------+
+        |                            ^
+        |                            |
+        v                            |
++----------------+      +----------------------+
+|    Embedding   |<---->|      Chunking &      |
+|    Service     |      |  Redaction Pipeline  |
++----------------+      +----------------------+
+```
+
+### Core Components
+
+*   **Server Core (`server.py`)**: The FastAPI application that serves as the main entry point. It exposes the API endpoints and directs requests to the Memory Manager.
+*   **Memory Manager**: The central orchestrator. It manages the entire lifecycle of a request, whether it's for ingesting new data or retrieving existing data.
+*   **Chunking**: Splits large documents into smaller, semantically coherent pieces (`chunks`). This is crucial for effective similarity search and for fitting context within an LLM's token limit.
+*   **Redaction**: An optional processing step that scans text for Personally Identifiable Information (PII) or other sensitive data and removes or masks it before storage.
+*   **Embeddings**: This component converts text chunks into numerical vectors (embeddings) using a specified model. These vectors capture the semantic meaning of the text.
+*   **Vector Storage**: A specialized database (e.g., ChromaDB, FAISS) that stores the embeddings and their associated text chunks. It allows for extremely fast semantic similarity searches.
+*   **Context Optimizer**: When a query is received, this component takes the raw search results from the vector store and intelligently selects, re-ranks, and formats them into a concise context string, respecting token limits.
+
+---
+
+## 3. API Reference
+
+The server exposes a simple RESTful API for interaction.
+
+### `POST /memory/add`
+
+Ingests a piece of text into the memory store. The text is chunked, redacted (if enabled), embedded, and stored.
+
+*   **Request Body (`application/json`)**:
+    ```json
+    {
+      "text": "The content you want to add to memory.",
+      "metadata": {
+        "source": "optional_source_filename.pdf",
+        "author": "optional_author_name"
+      }
+    }
+    ```
+    *   `text` (string, required): The raw text content to be stored.
+    *   `metadata` (object, optional): A dictionary of key-value pairs to associate with the text. Useful for filtering or tracing the origin of information.
+
+*   **Success Response (`200 OK`)**:
+    ```json
+    {
+      "status": "success",
+      "message": "Memory added successfully.",
+      "chunk_ids": ["id_1", "id_2"]
+    }
+    ```
+
+*   **Error Response (`400 Bad Request`)**:
+    ```json
+    {
+      "detail": "Request body is missing the 'text' field."
+    }
+    ```
+
+### `POST /context/generate`
+
+Retrieves relevant context from memory based on a user's query.
+
+*   **Request Body (`application/json`)**:
+    ```json
+    {
+      "query": "The question or topic to search for."
+    }
+    ```
+    *   `query` (string, required): The natural language query.
+
+*   **Success Response (`200 OK`)**:
+    ```json
+    {
+      "query": "The question or topic to search for.",
+      "context": "The compiled context string, optimized and ready for an LLM.",
+      "metadata": [
+        { "source": "source1.txt" },
+        { "source": "source2.pdf" }
+      ]
+    }
+    ```
+
+*   **Error Response (`400 Bad Request`)**:
+    ```json
+    {
+      "detail": "Request body is missing the 'query' field."
+    }
+    ```
+
+### `GET /health`
+
+A simple health check endpoint to verify that the server is running.
+
+*   **Request Body**: None.
+
+*   **Success Response (`200 OK`)**:
+    ```json
+    {
+      "status": "ok",
+      "version": "0.1.0"
+    }
+    ```
+
+---
+
+## 4. Configuration (`config.yaml`)
+
+All system behavior is controlled via `config.yaml`.
+
+### `server` Configuration
+
+Settings for the web server.
+
+```yaml
+server:
+  host: "127.0.0.1"  # IP address to bind to. Use "0.0.0.0" to expose externally.
+  port: 8000          # Port to run the server on.
+  log_level: "info"   # Logging verbosity: "debug", "info", "warning", "error".
+```
+
+### `embeddings` Configuration
+
+Defines the model used to convert text to vectors.
+
+```yaml
+embeddings:
+  # Provider for the embedding service. Supported: "openai", "huggingface" (local).
+  provider: openai
+  # The specific model to use.
+  model: text-embedding-ada-002
+  # Your API key (required for cloud providers like OpenAI).
+  api_key: "YOUR_API_KEY"
+```
+
+### `vector_storage` Configuration
+
+Settings for the database that stores the vectors.
+
+```yaml
+vector_storage:
+  # The vector database provider. Supported: "chroma".
+  provider: chroma
+  # Path to the directory where the database will be stored.
+  path: "./db/chroma_db"
+  # The name of the collection (like a table) within the database.
+  collection_name: "memex_main"
+```
+
+### `chunking` Configuration
+
+Controls how documents are split into smaller pieces.
+
+```yaml
+chunking:
+  # Strategy for splitting text. "recursive" is generally best.
+  strategy: "recursive"
+  # The target size of each chunk in characters.
+  chunk_size: 1000
+  # The number of characters to overlap between consecutive chunks.
+  chunk_overlap: 200
+```
+
+### `redaction` Configuration
+
+Settings for removing sensitive data.
+
+```yaml
+redaction:
+  # Set to true to enable PII redaction.
+  enabled: false
+  # A list of redaction rules to apply. (e.g., "EMAIL_ADDRESS", "PHONE_NUMBER")
+  rules:
+    - "EMAIL_ADDRESS"
+    - "CREDIT_CARD_NUMBER"
+```
+
+### `context_optimizer` Configuration
+
+Controls how the final context is assembled from search results.
+
+```yaml
+context_optimizer:
+  # The maximum number of tokens the final context string should contain.
+  max_tokens: 2500
+  # Strategy for selecting/ranking chunks. "re-rank" is more advanced.
+  strategy: "simple_stuff"
+```
+
+---
+
+## 5. Troubleshooting
+
+⚠️ **Disclaimer:** This software is in an early alpha stage and has not undergone formal testing. The following are common issues you might encounter.
+
+### Installation Issues
+
+*   **Problem**: `install.sh` fails with errors related to `gcc` or `make`.
+    *   **Solution**: You are missing system-level build tools. On Debian/Ubuntu, run `sudo apt-get install build-essential`. On macOS, install Xcode Command Line Tools with `xcode-select --install`.
+*   **Problem**: `pip install` fails on a specific package.
+    *   **Solution**: Ensure your Python version is 3.9+. Some dependencies may not support older or very new versions. Check the package's documentation for compatibility.
+
+### Server Startup Failures
+
+*   **Problem**: Server exits immediately with a `FileNotFoundError` for `config.yaml`.
+    *   **Solution**: You forgot to copy `config.yaml.example` to `config.yaml`. Run `cp config.yaml.example config.yaml`.
+*   **Problem**: Server fails with a YAML parsing error.
+    *   **Solution**: Your `config.yaml` has a syntax error. Use a YAML linter to validate its structure. Common mistakes include incorrect indentation.
+*   **Problem**: Server logs show an error like "Port 8000 is already in use".
+    *   **Solution**: Another application is using that port. Either stop the other application or change the `port` in your `config.yaml` to a different number (e.g., 8001).
+
+### API Errors
+
+*   **`401 Unauthorized` or `AuthenticationError` in logs**:
+    *   **Cause**: Your `embeddings.api_key` in `config.yaml` is missing, invalid, or has expired.
+    *   **Solution**: Verify your API key is correct and has sufficient credits/permissions.
+*   **`500 Internal Server Error`**:
+    *   **Cause**: A generic server-side error occurred.
+    *   **Solution**: Check the server's console output for a detailed traceback. This will point to the component that failed (e.g., an issue connecting to the vector store, a problem with the embedding model).
+*   **Getting empty `context` in responses**:
+    *   **Cause**: The query did not find any relevant information in the memory store.
+    *   **Solution**: This is not necessarily an error. It could mean the information doesn't exist. Try adding more relevant documents or rephrasing your query.
+
+---
+
+## 6. Performance Tuning
+
+To get the best results and efficiency, consider tuning these parameters.
+
+### Optimizing Chunking
+
+The `chunk_size` and `chunk_overlap` settings are critical.
+*   **Small `chunk_size` (~256-512 chars)**: Good for finding very specific facts (Q&A). Can sometimes miss broader context that spans multiple chunks.
+*   **Large `chunk_size` (~1000-2000 chars)**: Better for retaining context in narrative documents. May introduce more noise into the search results.
+*   **`chunk_overlap`**: A value of 10-20% of the `chunk_size` is a good starting point. It helps ensure semantic context isn't lost at the boundary between two chunks.
+
+### Choosing an Embedding Model
+
+The model in `embeddings.model` affects cost, speed, and quality.
+*   **High-Performance Models (e.g., `text-embedding-ada-002`)**: Excellent quality but can be costly and requires an internet connection.
+*   **Local Models (via `provider: "huggingface"`)**: Free to run (after download) and private. Performance varies greatly by model. Requires more powerful hardware (CPU/RAM, sometimes GPU) to run efficiently.
+
+### Vector Storage Selection
+
+While the initial implementation supports `chroma`, future versions may support others.
+*   **Disk-based (ChromaDB)**: Persistent, meaning your memory survives server restarts. Good for production.
+*   **In-memory (e.g., FAISS)**: Extremely fast, but the entire index is lost when the server stops. Best for temporary or experimental use cases where you re-ingest data on every run.
+
+### Context Optimization Strategy
+
+The `context_optimizer.max_tokens` setting is a direct trade-off.
+*   **Higher `max_tokens`**: Provides more context to the LLM, potentially improving answer quality. However, it increases the cost and latency of the final LLM call.
+*   **Lower `max_tokens`**: Cheaper and faster LLM calls. Risks not providing enough information for the LLM to form a correct answer. Tune this based on the complexity of your tasks and the context window of your target LLM.

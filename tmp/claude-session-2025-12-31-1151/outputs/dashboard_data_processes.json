@@ -1,0 +1,33 @@
+{
+  "timestamp": "2025-12-31T10:00:00Z",
+  "processes": [
+    {
+      "pid": 101, "ppid": 1, "state": "running", "command": "/usr/bin/claude-brain --master",
+      "cpu_percent": 25.5, "mem_percent": 15.2
+    },
+    {
+      "pid": 202, "ppid": 101, "state": "running", "command": "/usr/bin/codex-mcp --mode=primary",
+      "cpu_percent": 18.2, "mem_percent": 10.8
+    },
+    {
+      "pid": 303, "ppid": 202, "state": "sleeping", "command": "/usr/bin/gemini-coordinator --manager",
+      "cpu_percent": 5.1, "mem_percent": 8.5
+    },
+    {
+      "pid": 27268, "ppid": 303, "state": "running", "command": "ollama serve llava (A1)",
+      "cpu_percent": 92.3, "mem_percent": 22.1
+    },
+    {
+      "pid": 27315, "ppid": 303, "state": "idle", "command": "ollama serve llava (A2)",
+      "cpu_percent": 0.5, "mem_percent": 21.9
+    },
+    {
+      "pid": 27350, "ppid": 303, "state": "running", "command": "ollama serve llava (B1)",
+      "cpu_percent": 88.9, "mem_percent": 23.5
+    },
+    {
+      "pid": 27394, "ppid": 303, "state": "error", "command": "ollama serve llava (B2) --unresponsive",
+      "cpu_percent": 0.0, "mem_percent": 23.2
+    }
+  ]
+}

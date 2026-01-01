@@ -1,0 +1,8 @@
+error: unexpected argument '--skip-repo-check' found
+
+  tip: to pass '--skip-repo-check' as a value, use '-- --skip-repo-check'
+
+Usage: codex [OPTIONS] [PROMPT]
+       codex [OPTIONS] <COMMAND> [ARGS]
+
+For more information, try '--help'.

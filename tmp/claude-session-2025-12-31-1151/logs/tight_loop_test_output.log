@@ -1,0 +1,14 @@
+
+🚀 STARTING TIGHT LOOP KEYSTROKE TEST
+Target window: 5452 (test Claude)
+Test text: 'hello'
+
+
+[0 chars] ============================================================
+[0 chars] TIGHT LOOP TEST: Typing 'hello'
+[0 chars] ============================================================
+[0 chars] 🔍 VERIFY: Focus on window 5452...
+[0 chars] ❌ VERIFICATION ERROR: YABAI query failed
+[0 chars] ❌ Initial focus check failed - aborting
+
+❌ TEST FAILED - Check logs above

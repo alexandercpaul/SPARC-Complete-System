@@ -1,0 +1,5 @@
+Warning: Skipping extension in /Users/alexandercpaul/.gemini/extensions/conductor-v2: Extension with name conductor already was loaded.
+YOLO mode is enabled. All tool calls will be automatically approved.
+Loading extension: conductor
+Loaded cached credentials.
+Ollama vision test complete. The results are in `/Users/alexandercpaul/.gemini/tmp/eb8237250de4656d9371f808fb33cd75b0c6e1c0bcf93d55dfbb93672bb47776/ollama_vision_test_results.txt` and have been displayed.

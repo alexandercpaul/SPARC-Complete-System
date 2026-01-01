@@ -1,0 +1,25 @@
+{
+  "timestamp": "2025-12-31-121546",
+  "tasks": [
+    {
+      "name": "GPU-Parallel SPARC",
+      "pid": 74034,
+      "log": "tmp/quantum-parallel-2025-12-31-121546/gpu-parallel.log"
+    },
+    {
+      "name": "Instacart API SPARC",
+      "pid": 74035,
+      "log": "tmp/quantum-parallel-2025-12-31-121546/instacart-api.log"
+    },
+    {
+      "name": "Model Benchmarks",
+      "pid": 74036,
+      "log": "tmp/quantum-parallel-2025-12-31-121546/benchmarks.log"
+    },
+    {
+      "name": "TRUE SPARC",
+      "pid": 74040,
+      "log": "tmp/quantum-parallel-2025-12-31-121546/true-sparc.log"
+    }
+  ]
+}

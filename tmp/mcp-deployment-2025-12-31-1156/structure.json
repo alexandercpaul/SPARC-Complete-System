@@ -1,0 +1,9 @@
+{
+  "specification": "<class 'str'>",
+  "research": "<class 'list'>",
+  "pseudocode": "<class 'str'>",
+  "architecture": "<class 'str'>",
+  "implementation": "<class 'dict'>",
+  "tests": "<class 'str'>",
+  "documentation": "<class 'str'>"
+}

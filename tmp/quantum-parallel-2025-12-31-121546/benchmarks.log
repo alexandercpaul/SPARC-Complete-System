@@ -1,0 +1,60 @@
+
+============================================================
+Benchmarking: qwen2.5-coder:7b
+============================================================
+✅ qwen2.5-coder:7b:
+   Time: 10.50s
+   Output: 1385 chars
+   Speed: 132.0 chars/sec
+
+============================================================
+Benchmarking: sparc-qwen
+============================================================
+❌ sparc-qwen: Command '['ollama', 'run', 'sparc-qwen', 'Write a Python function to calculate fibonacci sequence recursively and iteratively']' timed out after 45 seconds
+
+============================================================
+Benchmarking: llama3.2:latest
+============================================================
+✅ llama3.2:latest:
+   Time: 13.33s
+   Output: 2547 chars
+   Speed: 191.1 chars/sec
+
+============================================================
+Benchmarking: conductor-sparc
+============================================================
+✅ conductor-sparc:
+   Time: 36.76s
+   Output: 2595 chars
+   Speed: 70.6 chars/sec
+
+
+============================================================
+FINAL RESULTS:
+============================================================
+{
+  "timestamp": "2025-12-31T12:15:46.375755",
+  "benchmarks": {
+    "qwen2.5-coder:7b": {
+      "time_seconds": 10.5,
+      "output_length": 1385,
+      "success": true,
+      "chars_per_second": 132.0
+    },
+    "sparc-qwen": {
+      "error": "Command '['ollama', 'run', 'sparc-qwen', 'Write a Python function to calculate fibonacci sequence recursively and iteratively']' timed out after 45 seconds"
+    },
+    "llama3.2:latest": {
+      "time_seconds": 13.33,
+      "output_length": 2547,
+      "success": true,
+      "chars_per_second": 191.1
+    },
+    "conductor-sparc": {
+      "time_seconds": 36.76,
+      "output_length": 2595,
+      "success": true,
+      "chars_per_second": 70.6
+    }
+  }
+}

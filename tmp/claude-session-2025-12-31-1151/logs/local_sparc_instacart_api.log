@@ -1,0 +1,17 @@
+🚀 Starting Local SPARC for Instacart API Client
+   Spec: 1153 chars
+   Started: 11:45:39
+
+================================================================================
+🏠 LOCAL Ollama SPARC - Instacart Voice Parser
+================================================================================
+Building: Voice → Grocery List converter
+Model: sparc-qwen (7.6B, SPARC-trained)
+Cost: $0 (local, unlimited)
+================================================================================
+
+Traceback (most recent call last):
+  File "/tmp/run_local_sparc_instacart_api.py", line 21, in <module>
+    result = sparc.run_sparc(spec)
+             ^^^^^^^^^^^^^^^
+AttributeError: 'LocalSPARC' object has no attribute 'run_sparc'

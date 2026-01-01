@@ -1,0 +1,55 @@
+{
+  "session": "2025-12-31T02:04:38.325071",
+  "target": "Primary Claude window 5256",
+  "command": "/compact",
+  "keystrokes": [
+    {
+      "timestamp": "2025-12-31T02:04:40.207876",
+      "char": "/",
+      "keycode": 44,
+      "success": true
+    },
+    {
+      "timestamp": "2025-12-31T02:04:40.288007",
+      "char": "c",
+      "keycode": 8,
+      "success": true
+    },
+    {
+      "timestamp": "2025-12-31T02:04:40.364601",
+      "char": "o",
+      "keycode": 31,
+      "success": true
+    },
+    {
+      "timestamp": "2025-12-31T02:04:40.440997",
+      "char": "m",
+      "keycode": 46,
+      "success": true
+    },
+    {
+      "timestamp": "2025-12-31T02:04:40.521122",
+      "char": "p",
+      "keycode": 35,
+      "success": true
+    },
+    {
+      "timestamp": "2025-12-31T02:04:40.601240",
+      "char": "a",
+      "keycode": 0,
+      "success": true
+    },
+    {
+      "timestamp": "2025-12-31T02:04:40.681342",
+      "char": "c",
+      "keycode": 8,
+      "success": true
+    },
+    {
+      "timestamp": "2025-12-31T02:04:40.757222",
+      "char": "t",
+      "keycode": 17,
+      "success": true
+    }
+  ]
+}

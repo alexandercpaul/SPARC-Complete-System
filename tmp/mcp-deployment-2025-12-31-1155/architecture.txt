@@ -1,0 +1,306 @@
+Of course. Here is the complete system architecture design for the Claude Code Memory Extension (CC-MemEx), based on the provided specification and algorithms.
+
+---
+
+### 1. Component Diagram
+
+This diagram illustrates the major components of the CC-MemEx system and their interactions.
+
+```mermaid
+graph TD
+    subgraph "Claude Code Client (e.g., IDE Plugin)"
+        A[Client Application]
+    end
+
+    subgraph "CC-MemEx Backend Service (AWS Fargate / Cloud Run)"
+        B(API Gateway / Load Balancer)
+        C{FastAPI Application}
+        D[Async Task Queue <br> (Celery / Redis)]
+        E[Ingestion Worker]
+        F[Secrets Manager <br> (AWS Secrets Manager)]
+        G[Observability <br> (Prometheus, Grafana, OpenTelemetry)]
+    end
+
+    subgraph "External & Data Services"
+        H[Embedding Model <br> (Hugging Face / S-Transformers)]
+        I[Vector Memory Store <br> (ChromaDB Server)]
+    end
+
+    %% Connections
+    A -- "1. Ingest/Retrieve (HTTPS)" --> B
+    B -- "2. Forward Request" --> C
+    C -- "3. Authenticate" --> F
+    C -- "4a. Enqueue Ingestion Task" --> D
+    C -- "5a. Query for Retrieval (Sync)" --> I
+    C -- "5b. Generate Query Embedding" --> H
+    D -- "4b. Dequeue Task" --> E
+    E -- "4c. Generate Chunk Embeddings" --> H
+    E -- "4d. Add Vectors & Metadata" --> I
+    C -- "Log & Monitor" --> G
+    E -- "Log & Monitor" --> G
+
+    %% Descriptions
+    classDef client fill:#e6f3ff,stroke:#005cb3,stroke-width:2px;
+    classDef backend fill:#e6ffe6,stroke:#006400,stroke-width:2px;
+    classDef data fill:#fff0e6,stroke:#d95f02,stroke-width:2px;
+
+    class A client;
+    class B,C,D,E,F,G backend;
+    class H,I data;
+```
+
+**Component Responsibilities:**
+
+*   **Claude Code Client:** The user-facing application (e.g., an IDE plugin) responsible for calling the CC-MemEx API, managing the final prompt assembly for Claude, and triggering context ingestion.
+*   **API Gateway / Load Balancer:** The public entry point. Handles TLS termination (NFR-4), rate limiting, and routing requests to the FastAPI application.
+*   **FastAPI Application:** The core of the service.
+    *   Handles authentication via the Secrets Manager (FR-4).
+    *   Provides the synchronous `/v1/retrieve-context` endpoint, directly querying the Vector Store.
+    *   Provides the asynchronous `/v1/ingest-context` endpoint, which validates the payload and pushes a job to the Async Task Queue before returning a `202 Accepted` response.
+*   **Async Task Queue (Celery/Redis):** Decouples the ingestion process from the API request-response cycle, ensuring the `/ingest-context` endpoint is highly responsive.
+*   **Ingestion Worker (Celery Worker):** A separate process that consumes tasks from the queue. It performs the heavy lifting: chunking text, calling the Embedding Model, and writing the resulting vectors and metadata to the Vector Memory Store (FR-1).
+*   **Secrets Manager:** Securely stores and manages API keys and other sensitive credentials (NFR-4).
+*   **Observability:** A suite of tools for structured logging, metrics collection (e.g., latency, error rates), and tracing to meet NFR-5.
+*   **Embedding Model:** A loaded `sentence-transformers` model responsible for converting text chunks into vector embeddings (AC-4). This can be run within the same container as the API/workers or as a separate microservice for scalability.
+*   **Vector Memory Store (ChromaDB):** A dedicated, server-deployed database that stores the vector embeddings and their associated metadata. It is optimized for fast, filtered semantic search (AC-3).
+
+---
+
+### 2. Data Flow
+
+#### 2.1. Ingestion Flow (Asynchronous)
+
+1.  **Client Trigger:** A user saves a file or a conversation turn completes. The **Claude Code Client** sends a `POST` request to `/v1/ingest-context` with the text content and metadata (`user_id`, `session_id`, etc.).
+2.  **API Handling:** The **API Gateway** routes the request to the **FastAPI Application**. The authentication middleware validates the `X-API-Key` against the **Secrets Manager**.
+3.  **Task Queuing:** The endpoint validates the request payload and immediately pushes a task with the payload to the **Async Task Queue (Celery)**. It then returns a `202 Accepted` response to the client.
+4.  **Worker Processing:** An **Ingestion Worker** picks up the task from the queue.
+5.  **Chunking & Embedding:** The worker chunks the text content using a token-aware splitter. For each chunk, it calls the **Embedding Model** to generate a vector embedding.
+6.  **Storage:** The worker connects to the **Vector Memory Store (ChromaDB)** and stores each vector along with its rich metadata (`user_id`, `session_id`, `source_type`, `original_text`, etc.).
+7.  **Monitoring:** The worker logs the outcome and sends metrics (e.g., `ingested_chunks_total`) to the **Observability** platform.
+
+#### 2.2. Retrieval Flow (Synchronous)
+
+1.  **Client Trigger:** A user submits a query to the AI assistant. The **Claude Code Client** sends a `POST` request to `/v1/retrieve-context` with the `query`, `user_id`, `session_id`, and `top_k`.
+2.  **API Handling:** The request follows the same path through the **API Gateway** and authentication middleware.
+3.  **Query Embedding:** The **FastAPI Application** takes the `query` string and calls the **Embedding Model** to generate a query vector.
+4.  **Semantic Search:** The application constructs a query for the **Vector Memory Store (ChromaDB)**. This query includes:
+    *   The query vector.
+    *   The number of results to retrieve (`top_k`).
+    *   A strict metadata filter to enforce data isolation: `{"user_id": "...", "session_id": "..."}` (FR-4).
+5.  **Results Returned:** ChromaDB performs an Approximate Nearest Neighbor (ANN) search on the filtered data and returns the top `k` most similar chunks (vector, metadata, and distance score).
+6.  **Response Formatting:** The FastAPI application formats the results into the specified JSON structure, converting distance to a `relevance_score`, and sends a `200 OK` response back to the client.
+7.  **Monitoring:** The application logs the request/response and records key metrics like `retrieve_context_latency_ms` to the **Observability** platform.
+
+---
+
+### 3. API Contracts (MCP Protocol)
+
+Based on FastAPI and Pydantic, the API contracts are defined as follows.
+
+#### Endpoint: `POST /v1/ingest-context`
+
+*   **Description:** Asynchronously ingests text content into the memory store.
+*   **Authentication:** Header `X-API-Key: <your_api_key>` is required.
+*   **Request Body (`application/json`):**
+    ```json
+    {
+      "text_content": "def my_function():\n  print('Hello, world!')",
+      "user_id": "user-12345",
+      "session_id": "project-alpha-session-xyz",
+      "source_type": "file",
+      "source_name": "src/utils/helpers.py"
+    }
+    ```
+*   **Responses:**
+    *   `202 Accepted`: Ingestion task was successfully queued.
+        ```json
+        { "status": "ACCEPTED", "message": "Context ingestion initiated successfully" }
+        ```
+    *   `400 Bad Request`: Invalid payload.
+    *   `403 Forbidden`: Invalid API Key.
+
+#### Endpoint: `POST /v1/retrieve-context`
+
+*   **Description:** Synchronously retrieves relevant context chunks based on a query.
+*   **Authentication:** Header `X-API-Key: <your_api_key>` is required.
+*   **Request Body (`application/json`):**
+    ```json
+    {
+      "query": "how do I use the helper function?",
+      "user_id": "user-12345",
+      "session_id": "project-alpha-session-xyz",
+      "top_k": 10,
+      "filter_metadata": {
+        "source_type": "file"
+      }
+    }
+    ```
+*   **Responses:**
+    *   `200 OK`: Successful retrieval.
+        ```json
+        {
+          "status": "SUCCESS",
+          "context_chunks": [
+            {
+              "text": "def my_function():\n  print('Hello, world!')",
+              "metadata": {
+                "source_type": "file",
+                "source_name": "src/utils/helpers.py",
+                "timestamp": "2023-10-27T10:00:00Z"
+              },
+              "relevance_score": 0.912
+            }
+          ]
+        }
+        ```
+    *   `400 Bad Request`: Invalid payload.
+    *   `403 Forbidden`: Invalid API Key.
+    *   `500 Internal Server Error`: An error occurred during retrieval.
+
+---
+
+### 4. Data Models
+
+#### 4.1. Pydantic Models (Python/FastAPI)
+
+These models define the structure for API validation and serialization.
+
+```python
+from pydantic import BaseModel, Field
+from typing import List, Dict, Any, Literal, Optional
+
+class IngestPayload(BaseModel):
+    text_content: str
+    user_id: str
+    session_id: str
+    source_type: Literal['conversation', 'file']
+    source_name: str
+
+class RetrievePayload(BaseModel):
+    query: str
+    user_id: str
+    session_id: str
+    top_k: int = Field(10, gt=0, le=50)
+    filter_metadata: Optional[Dict[str, Any]] = None
+
+class ContextChunkMetadata(BaseModel):
+    source_type: str
+    source_name: str
+    timestamp: str
+
+class RetrievedContextChunk(BaseModel):
+    text: str
+    metadata: ContextChunkMetadata
+    relevance_score: float
+
+class RetrieveResponse(BaseModel):
+    status: Literal['SUCCESS']
+    context_chunks: List[RetrievedContextChunk]
+```
+
+#### 4.2. Vector Database Schema (ChromaDB)
+
+Each item in a ChromaDB collection consists of an ID, an embedding, and a metadata payload.
+
+*   **Collection Name:** `cc_memex_v1`
+*   **ID:** A unique UUID string for each chunk (e.g., `str(uuid.uuid4())`).
+*   **Embedding:** A 384-dimensional vector (for `all-MiniLM-L6-v2`).
+*   **Metadata Document (Dictionary):**
+    ```json
+    {
+        "user_id": "user-12345", // Indexed for filtering
+        "session_id": "project-alpha-session-xyz", // Indexed for filtering
+        "source_type": "file", // Indexed for filtering
+        "source_name": "src/utils/helpers.py",
+        "timestamp": "2023-10-27T10:00:00Z",
+        "original_text": "def my_function():\n  print('Hello, world!')" // Not indexed, returned with result
+    }
+    ```
+    *Fields like `user_id`, `session_id`, and `source_type` must be indexed in the vector database for efficient filtering during queries.*
+
+---
+
+### 5. Technology Stack
+
+*   **Backend Framework:** **Python 3.11+** with **FastAPI** (AC-2)
+*   **Web Server:** **Uvicorn**
+*   **Vector Database:** **ChromaDB** (in client-server mode) (AC-3)
+*   **Embedding Model:** **`sentence-transformers`** library using `all-MiniLM-L6-v2` (AC-4)
+*   **Text Chunking:** **`langchain.text_splitter.RecursiveCharacterTextSplitter`** (or a similar robust library).
+*   **Async Task Queue:** **Celery** with **Redis** as the message broker.
+*   **Containerization:** **Docker** (AC-6)
+*   **Deployment:** **AWS Fargate** on ECS or **Google Cloud Run** (AC-6)
+*   **Secrets Management:** **AWS Secrets Manager**
+*   **Observability:**
+    *   **Logging:** **`structlog`** for structured JSON logs.
+    *   **Metrics:** **`prometheus-fastapi-instrumentator`** to expose a `/metrics` endpoint for Prometheus.
+    *   **Dashboards:** **Grafana**.
+*   **CI/CD:** **GitHub Actions** for automated testing and deployment.
+
+---
+
+### 6. File Structure
+
+A standard, scalable FastAPI project structure.
+
+```
+cc-memex/
+├── .github/workflows/         # CI/CD pipelines (e.g., test-and-deploy.yml)
+├── .env.example               # Example environment variables
+├── docker-compose.yml         # For local development (FastAPI, ChromaDB, Redis)
+├── Dockerfile                 # To containerize the FastAPI application
+├── pyproject.toml             # Project metadata and dependencies (using Poetry or PDM)
+├── requirements.txt           # Or managed by Poetry/PDM
+└── cc_memex_service/
+    ├── __init__.py
+    ├── api/                   # API endpoint definitions
+    │   ├── __init__.py
+    │   └── v1/
+    │       ├── __init__.py
+    │       └── endpoints.py   # Defines /ingest-context and /retrieve-context
+    ├── core/                  # Core business logic and configuration
+    │   ├── __init__.py
+    │   ├── config.py          # Settings management (from env vars)
+    │   └── chunking.py        # Text chunking strategies
+    ├── models/                # Pydantic data models
+    │   ├── __init__.py
+    │   └── schemas.py         # Contains all Pydantic models
+    ├── services/              # Clients for external services
+    │   ├── __init__.py
+    │   ├── embedding_service.py # Wrapper for the sentence-transformer model
+    │   └── vector_store.py    # Abstraction layer for ChromaDB client
+    ├── tasks/                 # Asynchronous Celery tasks
+    │   ├── __init__.py
+    │   └── ingestion_tasks.py # The `IngestContext` algorithm implementation
+    ├── main.py                # FastAPI application entry point, middleware setup
+    └── worker.py              # Celery worker entry point
+```
+
+---
+
+### 7. Integration Points
+
+This section clarifies how the `ClaudeCodeClientApplication` (from the pseudocode) interacts with the CC-MemEx service.
+
+1.  **Authentication:** The client must be provisioned with an API key. It must include this key in the `X-API-Key` header for every request to CC-MemEx.
+
+2.  **Ingestion Triggers (Client-Side Logic):** The client is responsible for deciding *when* to ingest context.
+    *   **Conversational Context:** After receiving a response from Claude, the client makes two *asynchronous* calls to `/v1/ingest-context`: one for the user's query and one for the AI's response.
+    *   **Code Context:** The client can trigger ingestion on events like:
+        *   File open or save.
+        *   User explicitly right-clicking a file/folder and selecting "Add to Claude's Memory".
+        *   On initial project load for key configuration files.
+
+3.  **RAG Execution Flow (The Core Loop):**
+    1.  **User sends a query.**
+    2.  Client immediately calls `POST /v1/retrieve-context` on CC-MemEx, providing the query and session identifiers. This is a **blocking, synchronous** call.
+    3.  CC-MemEx returns a ranked list of `context_chunks`.
+    4.  Client executes the **`ManageContextWindow` algorithm (Algorithm 3)**:
+        *   It calculates the available token budget.
+        *   It iterates through the retrieved chunks (sorted by `relevance_score`), adding them to a context string until the budget is filled.
+        *   It formats this context string using XML tags (`<retrieved_context>`, `<block>`) as recommended by Anthropic for better performance.
+    5.  Client constructs the **final prompt** for Claude, injecting the formatted context string.
+    6.  Client sends the complete prompt to the Anthropic Claude API.
+    7.  Client displays the response to the user and triggers the asynchronous ingestion of the new conversation turn (see point 2).
+
+4.  **Error Handling and Fallbacks:** If the call to `/v1/retrieve-context` fails or times out, the client application **must not fail**. It should log the error and proceed to call the Claude API with only the local context (e.g., recent conversation history), ensuring a graceful degradation of service.

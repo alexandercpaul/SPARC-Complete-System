@@ -1,0 +1,27 @@
+{
+  "server": {
+    "host": "127.0.0.1",
+    "port": 3000,
+    "api_key": "mcp-dev-key-change-in-production"
+  },
+  "memory": {
+    "chunk_size": 512,
+    "chunk_overlap": 50,
+    "max_tokens_default": 4000,
+    "persist_directory": "~/.mcp-memory"
+  },
+  "vector_store": {
+    "type": "chromadb",
+    "embedding_model": "all-MiniLM-L6-v2"
+  },
+  "workspace": {
+    "index_path": "~/Library/Mobile Documents/com~apple~CloudDocs/Developer/SPARC_Complete_System/tmp",
+    "auto_index_sessions": true,
+    "index_patterns": [
+      "claude-session-*/",
+      "gemini-task-*/",
+      "codex-task-*/",
+      "ollama-runs-*/"
+    ]
+  }
+}

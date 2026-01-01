@@ -1,0 +1,25 @@
+2025-12-31T09:19:39.071134Z ERROR codex_core::codex: failed to refresh available models: UnexpectedStatus(UnexpectedResponseError { status: 404, body: "{\"detail\":\"Not Found\"}", request_id: Some("9b68b2495f818dd6-EWR") })
+Reading prompt from stdin...
+OpenAI Codex v0.0.0 (research preview)
+--------
+workdir: /Users/alexandercpaul
+model: gpt-5.2-codex
+provider: openai
+approval: never
+sandbox: danger-full-access
+reasoning effort: xhigh
+reasoning summaries: auto
+session id: 019b73b4-ac3f-7b13-9841-847d25224bed
+--------
+user
+Say hello in 3 words
+
+mcp startup: no servers
+
+thinking
+**Preparing simple response**
+codex
+Hello from Codex
+tokens used
+815
+Hello from Codex

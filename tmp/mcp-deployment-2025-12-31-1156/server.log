@@ -1,0 +1,249 @@
+2025-12-31 12:21:36,825 - vector_store - INFO - Initializing VectorStore at /Users/alexandercpaul/.mcp-memory
+2025-12-31 12:21:36,825 - vector_store - INFO - Loading embedding model: all-MiniLM-L6-v2
+2025-12-31 12:21:36,851 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: mps
+2025-12-31 12:21:36,851 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-31 12:21:40,300 - vector_store - INFO - Loaded 2 documents from disk
+2025-12-31 12:21:40,300 - vector_store - INFO - VectorStore initialized with 2 existing documents
+2025-12-31 12:21:40,300 - memory_manager - INFO - MemoryManager initialized (chunk_size=512, overlap=50)
+2025-12-31 12:21:40,300 - context_optimizer - INFO - ContextOptimizer initialized (chars_per_token=4.0)
+2025-12-31 12:21:40,318 - server - INFO - Starting MCP Memory Extension server on 127.0.0.1:3000
+INFO:     Started server process [75342]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:3000 (Press CTRL+C to quit)
+
+╔════════════════════════════════════════════════════════════╗
+║                                                            ║
+║           MCP Memory Extension Server v1.0.0               ║
+║                                                            ║
+║  Semantic memory and context management for Claude Code   ║
+║                                                            ║
+╚════════════════════════════════════════════════════════════╝
+
+🚀 Starting server on http://127.0.0.1:3000
+
+📚 API Endpoints:
+   - POST /v1/ingest      - Ingest context into memory
+   - POST /v1/retrieve    - Retrieve relevant context
+   - POST /v1/clear       - Clear memory
+   - GET  /v1/stats       - Get statistics
+   - GET  /health         - Health check
+
+🔑 API Key: mcp-dev-key-change-in-production
+
+💾 Data Directory: ~/.mcp-memory/
+
+Press Ctrl+C to stop the server
+    
+INFO:     127.0.0.1:58819 - "GET /health HTTP/1.1" 200 OK
+2025-12-31 12:22:49,900 - server - INFO - Ingesting content: session_summary/2025-12-31-pre-compaction
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  1.13it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  1.13it/s]
+2025-12-31 12:22:50,801 - vector_store - INFO - Added 5 chunks to vector store
+2025-12-31 12:22:50,802 - memory_manager - INFO - Ingested 5 chunks from session_summary/2025-12-31-pre-compaction (session=2025-12-31-main-session, user=alexandercpaul@gmail.com)
+INFO:     127.0.0.1:58866 - "POST /v1/ingest HTTP/1.1" 200 OK
+2025-12-31 12:22:50,805 - server - INFO - Retrieving context for query: What did we accomplish today? What's the status of MCP Memory and 30TB storage?...
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 19.85it/s]
+2025-12-31 12:22:50,857 - vector_store - INFO - Query returned 3 results
+2025-12-31 12:22:50,857 - memory_manager - INFO - Retrieved 3 chunks for query (session=2025-12-31-main-session, user=alexandercpaul@gmail.com)
+2025-12-31 12:22:50,857 - context_optimizer - INFO - Optimized 3 chunks to 3 chunks (304/2000 tokens)
+2025-12-31 12:22:50,857 - server - INFO - Retrieved 3 chunks in 52.00ms
+INFO:     127.0.0.1:58867 - "POST /v1/retrieve HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58868 - "GET /v1/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59107 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59108 - "GET /v1/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59137 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59145 - "GET /v1/stats HTTP/1.1" 200 OK
+2025-12-31 12:26:09,959 - server - INFO - Retrieving context for query: What did we accomplish today? What is the status of MCP Memory Extension and Google 30TB storage res...
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  9.79it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  9.77it/s]
+2025-12-31 12:26:10,063 - vector_store - INFO - Query returned 5 results
+2025-12-31 12:26:10,064 - memory_manager - INFO - Retrieved 5 chunks for query (session=2025-12-31-main-session, user=alexandercpaul@gmail.com)
+2025-12-31 12:26:10,064 - context_optimizer - INFO - Optimized 5 chunks to 5 chunks (465/3000 tokens)
+2025-12-31 12:26:10,064 - server - INFO - Retrieved 5 chunks in 104.00ms
+INFO:     127.0.0.1:59160 - "POST /v1/retrieve HTTP/1.1" 200 OK
+2025-12-31 12:26:10,065 - server - INFO - Retrieving context for query: Where is the MCP Memory server located? What is the file path?...
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 54.28it/s]
+2025-12-31 12:26:10,085 - vector_store - INFO - Query returned 3 results
+2025-12-31 12:26:10,085 - memory_manager - INFO - Retrieved 3 chunks for query (session=2025-12-31-main-session, user=alexandercpaul@gmail.com)
+2025-12-31 12:26:10,085 - context_optimizer - INFO - Optimized 3 chunks to 3 chunks (332/3000 tokens)
+2025-12-31 12:26:10,085 - server - INFO - Retrieved 3 chunks in 19.00ms
+INFO:     127.0.0.1:59161 - "POST /v1/retrieve HTTP/1.1" 200 OK
+2025-12-31 12:26:10,086 - server - INFO - Retrieving context for query: What parallel tasks are running? What agents are active?...
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 47.37it/s]
+2025-12-31 12:26:10,108 - vector_store - INFO - Query returned 3 results
+2025-12-31 12:26:10,108 - memory_manager - INFO - Retrieved 3 chunks for query (session=2025-12-31-main-session, user=alexandercpaul@gmail.com)
+2025-12-31 12:26:10,108 - context_optimizer - INFO - Optimized 3 chunks to 3 chunks (304/3000 tokens)
+2025-12-31 12:26:10,108 - server - INFO - Retrieved 3 chunks in 22.00ms
+INFO:     127.0.0.1:59162 - "POST /v1/retrieve HTTP/1.1" 200 OK
+2025-12-31 12:26:10,110 - server - INFO - Retrieving context for query: What is the Instacart automation status? What is the accessibility goal?...
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 44.42it/s]
+2025-12-31 12:26:10,133 - vector_store - INFO - Query returned 3 results
+2025-12-31 12:26:10,133 - memory_manager - INFO - Retrieved 3 chunks for query (session=2025-12-31-main-session, user=alexandercpaul@gmail.com)
+2025-12-31 12:26:10,133 - context_optimizer - INFO - Optimized 3 chunks to 3 chunks (237/3000 tokens)
+2025-12-31 12:26:10,133 - server - INFO - Retrieved 3 chunks in 24.00ms
+INFO:     127.0.0.1:59163 - "POST /v1/retrieve HTTP/1.1" 200 OK
+2025-12-31 12:26:10,135 - server - INFO - Retrieving context for query: What should we do next after compaction? What are the priorities?...
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 46.75it/s]
+2025-12-31 12:26:10,157 - vector_store - INFO - Query returned 3 results
+2025-12-31 12:26:10,157 - memory_manager - INFO - Retrieved 3 chunks for query (session=2025-12-31-main-session, user=alexandercpaul@gmail.com)
+2025-12-31 12:26:10,157 - context_optimizer - INFO - Optimized 3 chunks to 3 chunks (285/3000 tokens)
+2025-12-31 12:26:10,157 - server - INFO - Retrieved 3 chunks in 22.00ms
+INFO:     127.0.0.1:59164 - "POST /v1/retrieve HTTP/1.1" 200 OK
+2025-12-31 12:26:15,153 - server - INFO - Ingesting content: test/pre-compact-test
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 32.49it/s]
+2025-12-31 12:26:15,185 - vector_store - INFO - Added 1 chunks to vector store
+2025-12-31 12:26:15,185 - memory_manager - INFO - Ingested 1 chunks from test/pre-compact-test (session=verification-test, user=alexandercpaul@gmail.com)
+INFO:     127.0.0.1:59195 - "POST /v1/ingest HTTP/1.1" 200 OK
+2025-12-31 12:26:16,972 - server - INFO - Retrieving context for query: MCP Memory Extension...
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  2.86it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  2.86it/s]
+2025-12-31 12:26:17,322 - vector_store - INFO - Query returned 2 results
+2025-12-31 12:26:17,322 - memory_manager - INFO - Retrieved 2 chunks for query (session=2025-12-31-main-session, user=alexandercpaul@gmail.com)
+2025-12-31 12:26:17,322 - context_optimizer - INFO - Optimized 2 chunks to 2 chunks (217/3000 tokens)
+2025-12-31 12:26:17,322 - server - INFO - Retrieved 2 chunks in 351.00ms
+INFO:     127.0.0.1:59206 - "POST /v1/retrieve HTTP/1.1" 200 OK
+2025-12-31 12:26:17,389 - server - INFO - Retrieving context for query: PRE-COMPACTION VERIFICATION TEST...
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  3.26it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  3.26it/s]
+2025-12-31 12:26:17,697 - vector_store - INFO - Query returned 1 results
+2025-12-31 12:26:17,697 - memory_manager - INFO - Retrieved 1 chunks for query (session=verification-test, user=alexandercpaul@gmail.com)
+2025-12-31 12:26:17,697 - context_optimizer - INFO - Optimized 1 chunks to 1 chunks (12/4000 tokens)
+2025-12-31 12:26:17,697 - server - INFO - Retrieved 1 chunks in 308.00ms
+INFO:     127.0.0.1:59207 - "POST /v1/retrieve HTTP/1.1" 200 OK
+2025-12-31 12:26:38,576 - server - INFO - Retrieving context for query: What did we accomplish today? MCP Memory Extension and Google 30TB storage research status...
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 13.67it/s]
+2025-12-31 12:26:38,650 - vector_store - INFO - Query returned 5 results
+2025-12-31 12:26:38,650 - memory_manager - INFO - Retrieved 5 chunks for query (session=2025-12-31-main-session, user=alexandercpaul@gmail.com)
+2025-12-31 12:26:38,650 - context_optimizer - INFO - Optimized 5 chunks to 5 chunks (465/5000 tokens)
+2025-12-31 12:26:38,650 - server - INFO - Retrieved 5 chunks in 75.00ms
+INFO:     127.0.0.1:59279 - "POST /v1/retrieve HTTP/1.1" 200 OK
+2025-12-31 12:26:38,652 - server - INFO - Retrieving context for query: Where are the critical files? Server location? Recovery files?...
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 31.68it/s]
+2025-12-31 12:26:38,685 - vector_store - INFO - Query returned 5 results
+2025-12-31 12:26:38,685 - memory_manager - INFO - Retrieved 5 chunks for query (session=2025-12-31-main-session, user=alexandercpaul@gmail.com)
+2025-12-31 12:26:38,685 - context_optimizer - INFO - Optimized 5 chunks to 5 chunks (465/5000 tokens)
+2025-12-31 12:26:38,685 - server - INFO - Retrieved 5 chunks in 32.00ms
+INFO:     127.0.0.1:59280 - "POST /v1/retrieve HTTP/1.1" 200 OK
+2025-12-31 12:26:38,687 - server - INFO - Retrieving context for query: What should we do next? Priorities after compaction? Google 30TB integration?...
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 33.17it/s]
+2025-12-31 12:26:38,718 - vector_store - INFO - Query returned 5 results
+2025-12-31 12:26:38,718 - memory_manager - INFO - Retrieved 5 chunks for query (session=2025-12-31-main-session, user=alexandercpaul@gmail.com)
+2025-12-31 12:26:38,718 - context_optimizer - INFO - Optimized 5 chunks to 5 chunks (465/5000 tokens)
+2025-12-31 12:26:38,718 - server - INFO - Retrieved 5 chunks in 31.00ms
+INFO:     127.0.0.1:59281 - "POST /v1/retrieve HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59306 - "POST /v1/stats HTTP/1.1" 405 Method Not Allowed
+INFO:     127.0.0.1:59309 - "GET /v1/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59406 - "POST /v1/retrieve HTTP/1.1" 422 Unprocessable Content
+2025-12-31 12:27:43,493 - server - INFO - Retrieving context for query: PRE-COMPACTION VERIFICATION TEST...
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 26.36it/s]
+2025-12-31 12:27:43,532 - vector_store - INFO - Query returned 1 results
+2025-12-31 12:27:43,532 - memory_manager - INFO - Retrieved 1 chunks for query (session=verification-test, user=alexandercpaul@gmail.com)
+2025-12-31 12:27:43,532 - context_optimizer - INFO - Optimized 1 chunks to 1 chunks (12/4000 tokens)
+2025-12-31 12:27:43,532 - server - INFO - Retrieved 1 chunks in 40.00ms
+INFO:     127.0.0.1:59475 - "POST /v1/retrieve HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59513 - "GET /health HTTP/1.1" 200 OK
+2025-12-31 12:27:59,734 - server - INFO - Retrieving context for query: What did we accomplish today with MCP Memory?...
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 19.17it/s]
+2025-12-31 12:27:59,787 - vector_store - INFO - Query returned 1 results
+2025-12-31 12:27:59,787 - memory_manager - INFO - Retrieved 1 chunks for query (session=2025-12-31-main-session, user=alexandercpaul@gmail.com)
+2025-12-31 12:27:59,787 - context_optimizer - INFO - Optimized 1 chunks to 1 chunks (113/4000 tokens)
+2025-12-31 12:27:59,787 - server - INFO - Retrieved 1 chunks in 53.00ms
+INFO:     127.0.0.1:59522 - "POST /v1/retrieve HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59677 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /v1/stats HTTP/1.1" 200 OK
+2025-12-31 12:29:07,830 - server - INFO - Ingesting content: compaction_marker/final-pre-compact-2025-12-31
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  5.20it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  5.20it/s]
+2025-12-31 12:29:08,023 - vector_store - INFO - Added 2 chunks to vector store
+2025-12-31 12:29:08,023 - memory_manager - INFO - Ingested 2 chunks from compaction_marker/final-pre-compact-2025-12-31 (session=2025-12-31-main-session, user=alexandercpaul@gmail.com)
+INFO:     127.0.0.1:59680 - "POST /v1/ingest HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59681 - "GET /v1/stats HTTP/1.1" 200 OK
+2025-12-31 12:30:21,765 - server - INFO - Ingesting content: research_results/google-30tb-research-complete
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  3.73it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  3.73it/s]
+2025-12-31 12:30:22,036 - vector_store - INFO - Added 23 chunks to vector store
+2025-12-31 12:30:22,036 - memory_manager - INFO - Ingested 23 chunks from research_results/google-30tb-research-complete (session=2025-12-31-main-session, user=alexandercpaul@gmail.com)
+INFO:     127.0.0.1:59916 - "POST /v1/ingest HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59917 - "GET /v1/stats HTTP/1.1" 200 OK
+2025-12-31 12:31:28,784 - server - INFO - Retrieving context for query: I just woke up after compaction. What was I working on? What should I do next? Where are the critica...
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 21.75it/s]
+2025-12-31 12:31:28,831 - vector_store - INFO - Query returned 7 results
+2025-12-31 12:31:28,831 - memory_manager - INFO - Retrieved 7 chunks for query (session=2025-12-31-main-session, user=alexandercpaul@gmail.com)
+2025-12-31 12:31:28,831 - context_optimizer - INFO - Optimized 7 chunks to 7 chunks (681/5000 tokens)
+2025-12-31 12:31:28,831 - server - INFO - Retrieved 7 chunks in 47.00ms
+INFO:     127.0.0.1:60072 - "POST /v1/retrieve HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60248 - "GET /health HTTP/1.1" 200 OK
+2025-12-31 12:34:06,614 - server - INFO - Retrieving context for query: What was accomplished today? What are the next priorities? Where are critical files?...
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 25.69it/s]
+2025-12-31 12:34:06,655 - vector_store - INFO - Query returned 10 results
+2025-12-31 12:34:06,655 - memory_manager - INFO - Retrieved 10 chunks for query (session=2025-12-31-main-session, user=alexandercpaul@gmail.com)
+2025-12-31 12:34:06,655 - context_optimizer - INFO - Optimized 10 chunks to 10 chunks (1018/4000 tokens)
+2025-12-31 12:34:06,655 - server - INFO - Retrieved 10 chunks in 41.00ms
+INFO:     127.0.0.1:60294 - "POST /v1/retrieve HTTP/1.1" 200 OK
+2025-12-31 12:34:16,075 - server - INFO - Retrieving context for query: What was accomplished today? What are the next priorities? Where are critical files?...
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 29.70it/s]
+2025-12-31 12:34:16,110 - vector_store - INFO - Query returned 10 results
+2025-12-31 12:34:16,110 - memory_manager - INFO - Retrieved 10 chunks for query (session=2025-12-31-main-session, user=alexandercpaul@gmail.com)
+2025-12-31 12:34:16,110 - context_optimizer - INFO - Optimized 10 chunks to 10 chunks (1018/4000 tokens)
+2025-12-31 12:34:16,110 - server - INFO - Retrieved 10 chunks in 35.00ms
+INFO:     127.0.0.1:60310 - "POST /v1/retrieve HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61357 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61516 - "GET /v1/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61683 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62393 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62394 - "GET /v1/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62395 - "GET /v1/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62407 - "GET /health HTTP/1.1" 200 OK
+2025-12-31 12:57:37,002 - server - INFO - Ingesting content: integration_test/30tb-integration-test
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  2.63it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  2.63it/s]
+2025-12-31 12:57:37,383 - vector_store - INFO - Added 3 chunks to vector store
+2025-12-31 12:57:37,383 - memory_manager - INFO - Ingested 3 chunks from integration_test/30tb-integration-test (session=2025-12-31-post-compaction, user=alexandercpaul@gmail.com)
+INFO:     127.0.0.1:62408 - "POST /v1/ingest HTTP/1.1" 200 OK
+2025-12-31 12:57:39,391 - server - INFO - Retrieving context for query: What is the 30TB integration status? How does cloud sync work?...
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 30.27it/s]
+2025-12-31 12:57:39,425 - vector_store - INFO - Query returned 3 results
+2025-12-31 12:57:39,425 - memory_manager - INFO - Retrieved 3 chunks for query (session=2025-12-31-post-compaction, user=alexandercpaul@gmail.com)
+2025-12-31 12:57:39,425 - context_optimizer - INFO - Optimized 3 chunks to 3 chunks (258/2000 tokens)
+2025-12-31 12:57:39,425 - server - INFO - Retrieved 3 chunks in 35.00ms
+INFO:     127.0.0.1:62417 - "POST /v1/retrieve HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62418 - "GET /v1/stats HTTP/1.1" 200 OK
+2025-12-31 12:59:05,379 - server - INFO - Ingesting content: integration_documentation/30tb-integration-complete
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  4.51it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  4.51it/s]
+2025-12-31 12:59:05,602 - vector_store - INFO - Added 18 chunks to vector store
+2025-12-31 12:59:05,602 - memory_manager - INFO - Ingested 18 chunks from integration_documentation/30tb-integration-complete (session=2025-12-31-post-compaction, user=alexandercpaul@gmail.com)
+INFO:     127.0.0.1:62701 - "POST /v1/ingest HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62718 - "POST /v1/retrieve HTTP/1.1" 422 Unprocessable Content
+INFO:     127.0.0.1:62722 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62723 - "GET /v1/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62724 - "GET /v1/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62754 - "POST /v1/retrieve HTTP/1.1" 422 Unprocessable Content
+2025-12-31 12:59:31,520 - server - INFO - Retrieving context for query: MCP Memory 30TB integration complete documentation system architecture...
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 35.56it/s]
+2025-12-31 12:59:31,549 - vector_store - INFO - Query returned 5 results
+2025-12-31 12:59:31,549 - memory_manager - INFO - Retrieved 5 chunks for query (session=2025-12-31-post-compaction, user=alexandercpaul@gmail.com)
+2025-12-31 12:59:31,549 - context_optimizer - INFO - Optimized 5 chunks to 5 chunks (422/3000 tokens)
+2025-12-31 12:59:31,549 - server - INFO - Retrieved 5 chunks in 29.00ms
+INFO:     127.0.0.1:62773 - "POST /v1/retrieve HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62808 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62820 - "GET /v1/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63127 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63128 - "GET /v1/stats HTTP/1.1" 200 OK
+2025-12-31 13:01:47,780 - server - INFO - Retrieving context for query: What is the complete MCP Memory 30TB integration architecture?...
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 15.28it/s]
+2025-12-31 13:01:47,847 - vector_store - INFO - Query returned 3 results
+2025-12-31 13:01:47,847 - memory_manager - INFO - Retrieved 3 chunks for query (session=2025-12-31-post-compaction, user=alexandercpaul@gmail.com)
+2025-12-31 13:01:47,847 - context_optimizer - INFO - Optimized 3 chunks to 3 chunks (254/4000 tokens)
+2025-12-31 13:01:47,847 - server - INFO - Retrieved 3 chunks in 67.00ms
+INFO:     127.0.0.1:63129 - "POST /v1/retrieve HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63922 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64540 - "GET /health HTTP/1.1" 200 OK
+2025-12-31 13:17:46,212 - server - INFO - Retrieving context for query: What was I working on? What agents are running? What are the next todos? What happened before the co...
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  8.75it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  8.74it/s]
+2025-12-31 13:17:46,327 - vector_store - INFO - Query returned 7 results
+2025-12-31 13:17:46,327 - memory_manager - INFO - Retrieved 7 chunks for query (session=2025-12-31-main-session, user=alexandercpaul@gmail.com)
+2025-12-31 13:17:46,327 - context_optimizer - INFO - Optimized 7 chunks to 7 chunks (655/5000 tokens)
+2025-12-31 13:17:46,327 - server - INFO - Retrieved 7 chunks in 116.00ms
+INFO:     127.0.0.1:64552 - "POST /v1/retrieve HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65083 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53072 - "GET /health HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [75342]
+/opt/homebrew/Cellar/python@3.14/3.14.2/Frameworks/Python.framework/Versions/3.14/lib/python3.14/multiprocessing/resource_tracker.py:396: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown: {'/loky-75342-lrflkcya'}
+  warnings.warn(

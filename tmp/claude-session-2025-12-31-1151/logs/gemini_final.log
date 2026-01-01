@@ -1,0 +1,7 @@
+Warning: Skipping extension in /Users/alexandercpaul/.gemini/extensions/conductor-v2: Extension with name conductor already was loaded.
+YOLO mode is enabled. All tool calls will be automatically approved.
+Loading extension: conductor
+Loaded cached credentials.
+Error when talking to Gemini API Full report available at: /var/folders/_q/cxbhbpzs473g003j2syz28nh0000gn/T/gemini-client-error-Turn.run-sendMessageStream-2025-12-31T05-30-22-912Z.json
+[API Error: Requested entity was not found.]
+An unexpected critical error occurred:[object Object]

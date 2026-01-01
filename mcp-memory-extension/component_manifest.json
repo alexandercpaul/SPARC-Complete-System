@@ -1,0 +1,9 @@
+{
+  "components": [
+    "MCP Server Core",
+    "Vector Storage Layer",
+    "Memory Manager",
+    "Context Optimizer"
+  ],
+  "total_components": 4
+}

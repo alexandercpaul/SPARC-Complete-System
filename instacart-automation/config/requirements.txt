@@ -1,0 +1,16 @@
+# Core dependencies
+requests>=2.31.0
+playwright>=1.40.0
+pyaudio>=0.2.14
+pytest>=7.4.0
+
+# Voice input
+openai-whisper>=20231117
+
+# Optional: AI parsing
+# ollama (uses local API, no pip package needed)
+
+# Development
+black>=23.0.0
+pylint>=3.0.0
+mypy>=1.7.0

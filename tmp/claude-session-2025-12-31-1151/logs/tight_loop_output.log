@@ -1,0 +1,45 @@
+
+🚀 STARTING TIGHT LOOP KEYSTROKE TEST
+Target window: 5452 (test Claude)
+Test text: 'hello'
+
+
+[0 chars] ============================================================
+[0 chars] TIGHT LOOP TEST: Typing 'hello'
+[0 chars] ============================================================
+[0 chars] 🔍 VERIFY: Focus on window 5452...
+[0 chars] ✅ VERIFIED: Window 5452 still focused
+[0 chars] 
+--- CHARACTER 1/5: 'h' ---
+[0 chars] 🔍 VERIFY: Focus on window 5452...
+[0 chars] ✅ VERIFIED: Window 5452 still focused
+[0 chars] ⌨️  Typing: 'h' (keycode: 4)
+[1 chars] ✓ Character typed successfully
+[1 chars] 📝 LOGGED: Keystroke 1 = 'h'
+[1 chars] 🔍 VERIFY: Focus on window 5452...
+[1 chars] ✅ VERIFIED: Window 5452 still focused
+[1 chars] 
+--- CHARACTER 2/5: 'e' ---
+[1 chars] 🔍 VERIFY: Focus on window 5452...
+[1 chars] ✅ VERIFIED: Window 5452 still focused
+[1 chars] ⌨️  Typing: 'e' (keycode: 14)
+[2 chars] ✓ Character typed successfully
+[2 chars] 📝 LOGGED: Keystroke 2 = 'e'
+[2 chars] 🔍 VERIFY: Focus on window 5452...
+[2 chars] ✅ VERIFIED: Window 5452 still focused
+[2 chars] 
+--- CHARACTER 3/5: 'l' ---
+[2 chars] 🔍 VERIFY: Focus on window 5452...
+[2 chars] ✅ VERIFIED: Window 5452 still focused
+[2 chars] ⌨️  Typing: 'l' (keycode: 37)
+[3 chars] ✓ Character typed successfully
+[3 chars] 📝 LOGGED: Keystroke 3 = 'l'
+[3 chars] 🔍 VERIFY: Focus on window 5452...
+[3 chars] ✅ VERIFIED: Window 5452 still focused
+[3 chars] 
+--- CHARACTER 4/5: 'l' ---
+[3 chars] 🔍 VERIFY: Focus on window 5452...
+[3 chars] ❌ VERIFICATION ERROR: YABAI query failed
+[3 chars] ❌ Focus lost before char 4 - ABORTING
+
+❌ TEST FAILED - Check logs above

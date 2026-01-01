@@ -1,0 +1,8 @@
+error: unexpected argument '--log-level' found
+
+  tip: to pass '--log-level' as a value, use '-- --log-level'
+
+Usage: codex [OPTIONS] [PROMPT]
+       codex [OPTIONS] <COMMAND> [ARGS]
+
+For more information, try '--help'.

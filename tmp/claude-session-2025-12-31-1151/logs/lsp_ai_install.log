@@ -1,0 +1,12 @@
+    Updating git repository `https://github.com/SilasMarvin/lsp-ai`
+  Installing lsp-ai v0.7.1 (https://github.com/SilasMarvin/lsp-ai#1e910a8c)
+    Updating crates.io index
+    Updating git repository `https://github.com/huggingface/hf-hub`
+error: failed to compile `lsp-ai v0.7.1 (https://github.com/SilasMarvin/lsp-ai#1e910a8c)`, intermediate artifacts can be found at `/var/folders/_q/cxbhbpzs473g003j2syz28nh0000gn/T/cargo-installdl3vfq`.
+To reuse those artifacts with a future compilation, set the environment variable `CARGO_TARGET_DIR` to that path.
+
+Caused by:
+  failed to select a version for the requirement `hf-hub = "^0.3.2"`
+  candidate versions found which didn't match: 0.4.3
+  location searched: Git repository https://github.com/huggingface/hf-hub
+  required by package `lsp-ai v0.7.1 (/Users/alexandercpaul/.cargo/git/checkouts/lsp-ai-dc53edea2a2cccef/1e910a8/crates/lsp-ai)`
