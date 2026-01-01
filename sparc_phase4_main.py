@@ -35,7 +35,15 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional, Dict, Any, List
 
-# Import Phase 4 modules (will be available after agents 13-19 complete)
+# Import Phase 4 modules
+try:
+    from sparc_phase4_integration import Orchestrator, OrchestrationResult
+except ImportError as e:
+    print(f"ERROR: Phase 4 integration module not found: {e}")
+    print("Ensure sparc_phase4_integration.py is in the same directory.")
+    sys.exit(4)
+
+# Import optional stub modules for compatibility
 try:
     from sparc_phase4_agent13_config_manager import ConfigManager, RuntimeConfig
     from sparc_phase4_agent14_logger import SecureLogger, setup_logging
@@ -43,7 +51,6 @@ try:
     from sparc_phase4_agent16_token_extractor import TokenExtractor, TokenResult
     from sparc_phase4_agent17_validator import TokenValidator, ValidationResult
     from sparc_phase4_agent18_performance_monitor import PerformanceMonitor, Metrics
-    from sparc_phase4_agent19_integration import orchestrate, AutomationResult
 except ImportError as e:
     # Fallback for standalone execution before Phase 4 modules are complete
     print(f"Warning: Phase 4 modules not yet available: {e}")
@@ -346,6 +353,26 @@ Voice Notifications:
         help='Save performance metrics to file'
     )
 
+    # Autonomous mode (NEW)
+    parser.add_argument(
+        '--autonomous',
+        action='store_true',
+        help='Enable autonomous mode (no human intervention, uses native macOS UI control)'
+    )
+
+    parser.add_argument(
+        '--headless',
+        action='store_true',
+        help='Run browser in headless mode (no GUI)'
+    )
+
+    parser.add_argument(
+        '--max-retries',
+        type=int,
+        default=3,
+        help='Maximum retry attempts for failed operations (default: 3)'
+    )
+
     args = parser.parse_args()
 
     # Validation: --name and --vaults required unless --config or --resume
@@ -515,8 +542,21 @@ def main() -> int:
         logger.info("Starting orchestrated automation workflow")
         voice_notifier.notify_progress("creating service account")
 
-        # Call main orchestration function (from agent 19)
-        result = orchestrate(config, logger, args)
+        # Call main orchestration function using Phase 4 Orchestrator
+        orchestrator_config = {
+            'autonomous': args.autonomous,
+            'max_retries': args.max_retries
+        }
+
+        orchestrator = Orchestrator(config=orchestrator_config)
+
+        # Run orchestration asynchronously
+        import asyncio
+        result = asyncio.run(orchestrator.orchestrate(
+            account_name=args.name,
+            vaults=args.vaults.split(',') if isinstance(args.vaults, str) else args.vaults,
+            headless=args.headless if hasattr(args, 'headless') else False
+        ))
 
         perf_monitor.end_operation("automation_total")
 
@@ -524,11 +564,11 @@ def main() -> int:
         if result.success:
             logger.info(f"SUCCESS: Service account '{result.service_account_name}' created")
             logger.info(f"Token persisted to ~/.zshrc")
-            logger.info(f"Total duration: {result.duration:.2f}s")
+            logger.info(f"Total duration: {result.duration_seconds:.2f}s")
 
             print(f"\n✅ SUCCESS!")
             print(f"   Service Account: {result.service_account_name}")
-            print(f"   Duration: {result.duration:.2f}s")
+            print(f"   Duration: {result.duration_seconds:.2f}s")
             print(f"   Token: ops_****...****")
             print(f"\n   Token saved to ~/.zshrc")
             print(f"   Reload your shell: source ~/.zshrc\n")
