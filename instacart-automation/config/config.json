@@ -1,0 +1,27 @@
+{
+  "instacart": {
+    "email": "your-email@example.com",
+    "password": "your-password"
+  },
+  "voice": {
+    "method": "whisper",
+    "duration": 10,
+    "fallback_to_text": true
+  },
+  "parser": {
+    "use_ai": true,
+    "ollama_url": "http://localhost:11434",
+    "model": "qwen2.5-coder:7b"
+  },
+  "automation": {
+    "use_browser": false,
+    "browser_headless": false,
+    "dry_run": true,
+    "default_store": "Costco"
+  },
+  "accessibility": {
+    "voice_shortcuts_enabled": true,
+    "confirmation_required": true,
+    "auto_reorder_favorites": false
+  }
+}

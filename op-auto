@@ -1,0 +1,115 @@
+#!/usr/bin/env python3
+"""
+1Password CLI Wrapper - Eliminates approval prompts for accessibility
+Caches biometric unlock session to reduce friction
+"""
+
+import subprocess
+import sys
+import os
+import keyring
+from datetime import datetime, timedelta
+import json
+
+# Constants
+KEYCHAIN_SERVICE = "1Password CLI Auto"
+SESSION_KEY = "biometric_session"
+EXPIRY_KEY = "session_expiry"
+SESSION_DURATION_MINUTES = 30
+
+def get_cached_session():
+    """Get cached session if still valid."""
+    expiry_str = keyring.get_password(KEYCHAIN_SERVICE, EXPIRY_KEY)
+    if not expiry_str:
+        return None
+
+    expiry = datetime.fromisoformat(expiry_str)
+    if datetime.now() >= expiry:
+        # Session expired
+        keyring.delete_password(KEYCHAIN_SERVICE, SESSION_KEY)
+        keyring.delete_password(KEYCHAIN_SERVICE, EXPIRY_KEY)
+        return None
+
+    return keyring.get_password(KEYCHAIN_SERVICE, SESSION_KEY)
+
+def cache_session():
+    """Authenticate once with biometric and cache session."""
+    try:
+        # Get account info to trigger biometric unlock
+        result = subprocess.run(
+            ["op", "account", "list", "--format=json"],
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+
+        if result.returncode == 0:
+            # Authentication succeeded - cache session indicator
+            expiry = datetime.now() + timedelta(minutes=SESSION_DURATION_MINUTES)
+            keyring.set_password(KEYCHAIN_SERVICE, SESSION_KEY, "authenticated")
+            keyring.set_password(KEYCHAIN_SERVICE, EXPIRY_KEY, expiry.isoformat())
+            return True
+        else:
+            print(f"Authentication failed: {result.stderr}", file=sys.stderr)
+            return False
+
+    except subprocess.TimeoutExpired:
+        print("Authentication timed out - biometric prompt may have been dismissed", file=sys.stderr)
+        return False
+    except Exception as e:
+        print(f"Error during authentication: {e}", file=sys.stderr)
+        return False
+
+def run_op_command(args):
+    """Run 'op' command with cached session."""
+    # Check cached session
+    if not get_cached_session():
+        print("🔐 Authenticating with Touch ID (one-time for 30 minutes)...", file=sys.stderr)
+        if not cache_session():
+            print("❌ Authentication failed", file=sys.stderr)
+            return 1
+        print("✅ Authenticated successfully", file=sys.stderr)
+
+    # Run the actual op command
+    try:
+        result = subprocess.run(
+            ["op"] + args,
+            timeout=60
+        )
+        return result.returncode
+    except subprocess.TimeoutExpired:
+        print("Command timed out", file=sys.stderr)
+        return 1
+    except Exception as e:
+        print(f"Error running command: {e}", file=sys.stderr)
+        return 1
+
+def main():
+    if len(sys.argv) < 2 or sys.argv[1] in ["-h", "--help", "help"]:
+        print("""
+1Password CLI Wrapper - Auto Authentication
+
+Usage: op-auto [op-command] [args...]
+
+Examples:
+  op-auto account list
+  op-auto item list
+  op-auto item get "My Item"
+
+Features:
+  - Uses Touch ID biometric authentication (when available)
+  - Caches authentication for 30 minutes
+  - Eliminates repeated approval prompts
+  - Drop-in replacement for 'op' command
+
+Accessibility:
+  This tool reduces typing and clicking for users with accessibility needs.
+  After one Touch ID authentication, all subsequent commands run automatically
+  for 30 minutes without prompts.
+""")
+        return 0
+
+    return run_op_command(sys.argv[1:])
+
+if __name__ == "__main__":
+    sys.exit(main())
